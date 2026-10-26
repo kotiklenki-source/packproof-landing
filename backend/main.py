@@ -9,17 +9,15 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="PackProof Inspection API")
 
-# Определяем базовую директорию (папку, где лежит main.py)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# Папка static находится на уровень выше (в корне проекта)
-STATIC_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "static"))
-# Папка uploads
-UPLOAD_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "uploads"))
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+# 1. Четкий поиск корня проекта и папки static
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Это папка backend
+PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, ".."))  # Это корень репозитория
 
-# Если вдруг static лежит рядом с main.py в папке backend, используй:
-if not os.path.exists(STATIC_DIR):
-    STATIC_DIR = os.path.join(BASE_DIR, "static")
+# Пути к static и uploads в корне проекта
+STATIC_DIR = os.path.join(PROJECT_ROOT, "static")
+UPLOAD_DIR = os.path.join(PROJECT_ROOT, "uploads")
+
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app.add_middleware(
     CORSMiddleware,
@@ -32,7 +30,7 @@ app.add_middleware(
 video_db = {}
 
 
-# --- 1. Маршруты для страниц ---
+# --- Маршруты для страниц ---
 
 @app.get("/")
 async def read_root():
@@ -47,7 +45,7 @@ async def read_verify():
     return FileResponse(os.path.join(STATIC_DIR, "verify.html"))
 
 
-# --- 2. Бэкенд API ---
+# --- Бэкенд API ---
 
 @app.post("/api/upload")
 async def upload_video(file: UploadFile = File(...), tracking_id: str = Form(...)):
@@ -109,7 +107,7 @@ async def verify_video(identifier: str):
     }
 
 
-# --- 3. Подключение статических папок ---
+# --- Подключение статических папок ---
 
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
