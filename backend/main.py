@@ -9,7 +9,18 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="PackProof Inspection API")
 
-# Настройка CORS
+# Определяем базовую директорию (папку, где лежит main.py)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Папка static находится на уровень выше (в корне проекта)
+STATIC_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "static"))
+# Папка uploads
+UPLOAD_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "uploads"))
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+# Если вдруг static лежит рядом с main.py в папке backend, используй:
+if not os.path.exists(STATIC_DIR):
+    STATIC_DIR = os.path.join(BASE_DIR, "static")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,41 +29,31 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Папка для хранения загруженных видео
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-# Хранилище метаданных в памяти (в продакшене заменяется на БД)
 video_db = {}
 
 
-# --- 1. Маршруты для страниц (чистые URL) ---
+# --- 1. Маршруты для страниц ---
 
 @app.get("/")
 async def read_root():
-    return FileResponse("static/index.html")
+    return FileResponse(os.path.join(STATIC_DIR, "index.html"))
 
 @app.get("/app")
 async def read_app():
-    return FileResponse("static/app.html")
+    return FileResponse(os.path.join(STATIC_DIR, "app.html"))
 
 @app.get("/verify")
 async def read_verify():
-    return FileResponse("static/verify.html")
+    return FileResponse(os.path.join(STATIC_DIR, "verify.html"))
 
 
-# --- 2. Бэкенд API для работы с видео и QR ---
+# --- 2. Бэкенд API ---
 
 @app.post("/api/upload")
 async def upload_video(file: UploadFile = File(...), tracking_id: str = Form(...)):
-    """Принимает видео, считает SHA-256 хеш и сохраняет файл."""
     try:
         contents = await file.read()
-        
-        # Вычисление SHA-256
         sha256_hash = hashlib.sha256(contents).hexdigest()
-        
-        # Сохранение файла на диск
         file_extension = os.path.splitext(file.filename)[1] or ".webm"
         saved_filename = f"{sha256_hash}{file_extension}"
         file_path = os.path.join(UPLOAD_DIR, saved_filename)
@@ -60,7 +61,6 @@ async def upload_video(file: UploadFile = File(...), tracking_id: str = Form(...
         with open(file_path, "wb") as f:
             f.write(contents)
             
-        # Сохранение информации о видео
         video_info = {
             "tracking_id": tracking_id,
             "filename": saved_filename,
@@ -82,18 +82,10 @@ async def upload_video(file: UploadFile = File(...), tracking_id: str = Form(...
 
 @app.get("/api/qr/{tracking_id}")
 async def generate_qr(tracking_id: str):
-    """Генерирует QR-код со ссылкой на страницу проверки."""
     verify_url = f"https://packproofinspection.com/verify?id={tracking_id}"
-    
-    qr = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=10,
-        border=4,
-    )
+    qr = qrcode.QRCode(version=1, box_size=10, border=4)
     qr.add_data(verify_url)
     qr.make(fit=True)
-    
     img = qr.make_image(fill_color="black", back_color="white")
     
     img_byte_arr = BytesIO()
@@ -105,7 +97,6 @@ async def generate_qr(tracking_id: str):
 
 @app.get("/api/verify/{identifier}")
 async def verify_video(identifier: str):
-    """Проверяет наличие видео по tracking_id или SHA-256 хешу."""
     video_info = video_db.get(identifier)
     if not video_info:
         raise HTTPException(status_code=404, detail="Proof record not found")
@@ -121,4 +112,4 @@ async def verify_video(identifier: str):
 # --- 3. Подключение статических папок ---
 
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
