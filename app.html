@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PackProof Recorder & Label Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root {
+      --bg-start: #0b132b;
+      --bg-end: #064e3b;
+      --card-bg: rgba(28, 37, 65, 0.95);
+      --text: #ffffff;
+      --muted: #94a3b8;
+      --accent-green: #10b981;
+      --accent-blue: #3a86ff;
+      --accent-blue-hover: #2563eb;
+      --danger: #ef4444;
+      --border: rgba(58, 134, 255, 0.25);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .header-bar {
+      max-width: 900px;
+      margin: 0 auto 20px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-back {
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .btn-back:hover { color: var(--accent-blue); }
+
+    .lang-switch {
+      display: flex;
+      gap: 6px;
+      background: rgba(11, 19, 43, 0.6);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .lang-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .lang-btn.active {
+      background: var(--accent-blue);
+      color: #fff;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(58, 134, 255, 0.15);
+      border: 1px solid var(--border);
+    }
+
+    h1 {
+      margin: 0 0 5px 0;
+      font-size: 1.8rem;
+      background: linear-gradient(90deg, #ffffff, var(--accent-blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.subtitle {
+      color: var(--muted);
+      margin: 0 0 25px 0;
+      font-size: 0.95rem;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(11, 19, 43, 0.7);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1.1rem;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 10px rgba(58, 134, 255, 0.3);
+    }
+
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      background: #000;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      border: 2px solid var(--border);
+      aspect-ratio: 16/9;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .status-badge {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: rgba(11, 19, 43, 0.85);
+      color: var(--accent-green);
+      border: 1px solid var(--accent-green);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      backdrop-filter: blur(4px);
+    }
+
+    .status-recording {
+      color: var(--danger);
+      border-color: var(--danger);
+      animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+
+    .btn {
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.98); }
+
+    .btn-blue {
+      background: var(--accent-blue);
+      color: #fff;
+    }
+    .btn-blue:hover { background: var(--accent-blue-hover); }
+
+    .btn-red {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+    .btn-red:hover { background: rgba(239, 68, 68, 0.3); }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Секция подтверждения и этикетки */
+    .proof-box {
+      display: none;
+      background: rgba(11, 19, 43, 0.6);
+      border: 1px solid var(--accent-green);
+      border-radius: 14px;
+      padding: 20px;
+      margin-top: 25px;
+    }
+
+    .proof-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--accent-green);
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+    }
+
+    .hash-display {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 12px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      word-break: break-all;
+      margin-bottom: 20px;
+      border-left: 3px solid var(--accent-green);
+    }
+
+    /* Наклейка */
+    .label-preview {
+      background: #ffffff;
+      color: #000000;
+      padding: 20px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .label-info {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .label-brand { font-size: 0.8rem; font-weight: 800; color: #064e3b; letter-spacing: 1px; }
+    .label-title { font-size: 1.1rem; font-weight: 800; color: #111; }
+    .label-order { font-size: 1.2rem; font-weight: 900; color: #000; font-family: monospace; }
+    .label-time { font-size: 0.75rem; color: #555; }
+
+    .action-links {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      text-align: center;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.2); }
+
+    /* Стили для печати */
+    @media print {
+      body * { visibility: hidden; }
+      .label-preview, .label-preview * { visibility: visible; }
+      .label-preview {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        border: 2px solid #000;
+      }
+    }
+  </style>
+  <!-- PackProof Favicon & Web Manifest -->
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+</head>
+<body>
+
+  <div class="header-bar">
+    <a href="index.html" class="btn-back" id="btnBack">← Startseite</a>
+    <div class="lang-switch">
+      <button class="lang-btn active" onclick="setLanguage('de')">DE</button>
+      <button class="lang-btn" onclick="setLanguage('en')">EN</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1 id="txtTitle">PackProof Recorder</h1>
+    <p class="subtitle" id="txtSub">Video-Dokumentation & SHA-256 Verifikation</p>
+
+    <div class="form-group">
+      <label id="lblOrderId">Bestellnummer / Sendungsnummer (Order ID / Tracking):</label>
+      <input type="text" id="orderIdInput" placeholder="z.B. DE-9948271" autofocus>
+    </div>
+
+    <div class="video-wrapper">
+      <div id="status" class="status-badge">Kamera nicht verbunden</div>
+      <video id="webcam" autoplay playsinline muted></video>
+    </div>
+
+    <div class="controls-grid">
+      <button id="btnConnect" class="btn btn-blue">1. Kamera aktivieren</button>
+      <button id="btnRecord" class="btn btn-blue" disabled>2. Aufnahme starten</button>
+      <button id="btnStop" class="btn btn-red" disabled>3. Stoppen & Sichern</button>
+    </div>
+
+    <div id="proofBox" class="proof-box">
+      <div class="proof-header">
+        <span>✓</span> <span id="txtVerified">Aufnahme gesichert & verifiziert!</span>
+      </div>
+
+      <div>
+        <label id="txtHashLabel">SHA-256 Video-Hash:</label>
+        <div id="hashValue" class="hash-display">Calculating...</div>
+      </div>
+
+      <!-- Печатная этикетка -->
+      <div class="label-preview">
+        <div class="label-info">
+          <div class="label-brand">PACKPROOF INSPECTED</div>
+          <div class="label-title">VIDEO-VERIFIED PARCEL</div>
+          <div class="label-order" id="labelOrderId">ID-00000</div>
+          <div class="label-time" id="labelTimestamp">--.--.---- --:--</div>
+        </div>
+        <div id="qrcode"></div>
+      </div>
+
+      <div class="action-links">
+        <a id="downloadLink" class="btn btn-secondary" href="#" download>Video herunterladen (.webm)</a>
+        <button id="btnPrint" class="btn btn-secondary" onclick="window.print()">Etikett drucken</button>
+        <button id="btnNext" class="btn btn-blue" onclick="resetForNextParcel
