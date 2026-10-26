@@ -9,14 +9,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="PackProof Inspection API")
 
-# 1. Четкий поиск корня проекта и папки static
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Это папка backend
-PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, ".."))  # Это корень репозитория
+# 1. Определяем корень проекта (где лежат index.html, app.html, verify.html)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Папка backend
+PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, ".."))  # Корень репозитория
 
-# Пути к static и uploads в корне проекта
-STATIC_DIR = os.path.join(PROJECT_ROOT, "static")
+# Папка для загрузок
 UPLOAD_DIR = os.path.join(PROJECT_ROOT, "uploads")
-
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app.add_middleware(
@@ -30,22 +28,22 @@ app.add_middleware(
 video_db = {}
 
 
-# --- Маршруты для страниц ---
+# --- 2. Маршруты для страниц ---
 
 @app.get("/")
 async def read_root():
-    return FileResponse(os.path.join(STATIC_DIR, "index.html"))
+    return FileResponse(os.path.join(PROJECT_ROOT, "index.html"))
 
 @app.get("/app")
 async def read_app():
-    return FileResponse(os.path.join(STATIC_DIR, "app.html"))
+    return FileResponse(os.path.join(PROJECT_ROOT, "app.html"))
 
 @app.get("/verify")
 async def read_verify():
-    return FileResponse(os.path.join(STATIC_DIR, "verify.html"))
+    return FileResponse(os.path.join(PROJECT_ROOT, "verify.html"))
 
 
-# --- Бэкенд API ---
+# --- 3. Бэкенд API ---
 
 @app.post("/api/upload")
 async def upload_video(file: UploadFile = File(...), tracking_id: str = Form(...)):
@@ -107,7 +105,7 @@ async def verify_video(identifier: str):
     }
 
 
-# --- Подключение статических папок ---
+# --- 4. Подключение статики ---
 
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
-app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
+app.mount("/", StaticFiles(directory=PROJECT_ROOT, html=True), name="static")
