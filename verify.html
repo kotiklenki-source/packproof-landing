@@ -1,207 +1,114 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PackProof Verification Portal</title>
-  <style>
-    :root {
-      --bg: #0b132b; /* Глубокий тёмно-синий фон */
-      --card-bg: #1c2541; /* Тёмно-синяя карточка */
-      --text: #ffffff;
-      --accent-green: #10b981; /* Изумрудно-зелёный */
-      --accent-blue: #3a86ff; /* Яркий технологичный синий */
-      --muted: #94a3b8;
-      --danger: #ef4444;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(135deg, #0b132b 0%, #064e3b 100%); /* Плавный градиент из тёмно-синего в тёмно-зелёный */
-      color: var(--text);
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      box-sizing: border-box;
-    }
-
-    .container {
-      background: rgba(28, 37, 65, 0.95);
-      padding: 30px;
-      border-radius: 16px;
-      max-width: 600px;
-      width: 100%;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(58, 134, 255, 0.15);
-      border: 1px solid rgba(58, 134, 255, 0.3);
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--accent-green);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-weight: bold;
-      font-size: 0.95rem;
-      margin-bottom: 20px;
-    }
-
-    h1 {
-      margin: 0 0 10px 0;
-      font-size: 1.6rem;
-      background: linear-gradient(90deg, #ffffff, var(--accent-blue));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    p.subtitle {
-      color: var(--muted);
-      font-size: 0.9rem;
-      margin-bottom: 20px;
-    }
-
-    video {
-      width: 100%;
-      border-radius: 12px;
-      background: #000;
-      margin-bottom: 20px;
-      border: 2px solid rgba(58, 134, 255, 0.4);
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-    }
-
-    .info-group {
-      background: rgba(11, 19, 43, 0.6);
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      border-left: 3px solid var(--accent-blue);
-      word-break: break-all;
-    }
-
-    .info-label {
-      font-size: 0.8rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 5px;
-    }
-
-    .info-value {
-      font-size: 0.95rem;
-      font-weight: 500;
-    }
-
-    #loading {
-      text-align: center;
-      padding: 40px 0;
-      color: var(--muted);
-    }
-
-    #errorBox {
-      display: none;
-      background: rgba(239, 68, 68, 0.15);
-      color: var(--danger);
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-      border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-
-    #contentBox {
-      display: none;
-    }
-  </style>
-  <!-- PackProof Favicon & Web Manifest -->
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="manifest" href="/site.webmanifest">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PackProof — Verpackungsnachweis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
+<body class="bg-slate-900 text-white min-h-screen flex flex-col items-center justify-center p-4">
 
-  <div class="container">
-    <div id="loading">
-      <h2>Abrufen der Verifikationsdaten...</h2>
-      <p>Bitte warten...</p>
-    </div>
+    <div class="max-w-md w-full bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden p-6 text-center">
+        <!-- Logo Header -->
+        <div class="mb-6 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-shield-halved text-emerald-400 text-3xl"></i>
+            <span class="text-2xl font-bold tracking-wide">PackProof</span>
+        </div>
 
-    <div id="errorBox">
-      <h2>❌ Verpackungsnachweis nicht gefunden</h2>
-      <p>Für diese Bestellnummer wurde noch keine Dokumentation im System hinterlegt.</p>
-    </div>
+        <!-- Loading Spinner -->
+        <div id="loading" class="py-12">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-400 border-t-transparent"></div>
+            <p class="mt-4 text-slate-400">Verpackungsnachweis wird geladen...</p>
+        </div>
 
-    <div id="contentBox">
-      <div class="badge">
-        ✓ VERIFIED PACKPROOF
-      </div>
+        <!-- Error Card -->
+        <div id="errorCard" class="hidden bg-rose-500/10 border border-rose-500/30 rounded-xl p-6 my-4">
+            <i class="fa-solid fa-circle-xmark text-rose-500 text-4xl mb-3"></i>
+            <h2 class="text-xl font-bold text-rose-400 mb-2">Verpackungsnachweis nicht gefunden</h2>
+            <p class="text-slate-300 text-sm">Für diese Bestellnummer wurde noch keine Dokumentation im System hinterlegt oder der Link ist ungültig.</p>
+        </div>
 
-      <h1>Verpackungsdokumentation</h1>
-      <p class="subtitle">Offizielle Video-Dokumentation für die Sendung</p>
+        <!-- Success Content / Video Player -->
+        <div id="successContent" class="hidden">
+            <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mb-6 flex items-center gap-3 text-left">
+                <i class="fa-solid fa-circle-check text-emerald-400 text-2xl"></i>
+                <div>
+                    <h3 class="font-semibold text-emerald-400">Verifiziert & Gesichert</h3>
+                    <p class="text-xs text-slate-300">Sendungs-ID: <span id="displayTrackingId" class="font-mono text-white font-bold"></span></p>
+                </div>
+            </div>
 
-      <video id="player" controls autoplay muted></video>
+            <!-- Video Player -->
+            <div class="relative rounded-xl overflow-hidden bg-black border border-slate-700 shadow-inner mb-4">
+                <video id="videoPlayer" class="w-full h-auto max-h-[450px]" controls autoplay muted playsinline>
+                    Ihr Browser unterstützt dieses Videoformat nicht.
+                </video>
+            </div>
 
-      <div class="info-group">
-        <div class="info-label">Bestellnummer / Tracking-ID</div>
-        <div class="info-value" id="resOrder">-</div>
-      </div>
-
-      <div class="info-group">
-        <div class="info-label">Aufnahmedatum & Zeit</div>
-        <div class="info-value" id="resDate">-</div>
-      </div>
-
-      <div class="info-group">
-        <div class="info-label">SHA-256 Video-Fingerabdruck (Hash)</div>
-        <div class="info-value" style="font-family: monospace; font-size: 0.85rem;" id="resHash">-</div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    async function loadVerification() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const orderId = urlParams.get('order');
-
-      const loading = document.getElementById('loading');
-      const errorBox = document.getElementById('errorBox');
-      const contentBox = document.getElementById('contentBox');
-
-      if (!orderId) {
-        loading.style.display = 'none';
-        errorBox.style.display = 'block';
-        return;
-      }
-
-      try {
-        const response = await fetch(`http://127.0.0.1:8000/api/verify/${encodeURIComponent(orderId)}`);
+            <div class="text-left bg-slate-900/60 rounded-lg p-3 border border-slate-700/50 text-xs text-slate-400 space-y-1">
+                <p><span class="font-semibold text-slate-300">SHA-256 Hash:</span></p>
+                <p id="displayHash" class="font-mono break-all text-[10px] text-emerald-400/80"></p>
+            </div>
+        </div>
         
-        if (!response.ok) throw new Error("Not found");
+        <div class="mt-6 pt-4 border-t border-slate-700/60 text-xs text-slate-500">
+            &copy; PackProof Inspection System
+        </div>
+    </div>
 
-        const data = await response.json();
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loading = document.getElementById('loading');
+            const errorCard = document.getElementById('errorCard');
+            const successContent = document.getElementById('successContent');
+            const videoPlayer = document.getElementById('videoPlayer');
+            const displayTrackingId = document.getElementById('displayTrackingId');
+            const displayHash = document.getElementById('displayHash');
 
-        document.getElementById('resOrder').textContent = data.order_id;
-        document.getElementById('resDate').textContent = data.created_at;
-        document.getElementById('resHash').textContent = data.sha256_hash;
-        
-        const player = document.getElementById('player');
-        player.src = data.video_url;
+            // Парсим параметры из URL: поддерживаем ?id=..., ?tracking_id=... и путь /verify/ID
+            const urlParams = new URLSearchParams(window.location.search);
+            let identifier = urlParams.get('id') || urlParams.get('tracking_id') || urlParams.get('identifier');
 
-        loading.style.display = 'none';
-        contentBox.style.display = 'block';
-      } catch (err) {
-        loading.style.display = 'none';
-        errorBox.style.display = 'block';
-      }
-    }
+            // Если параметров нет в query string, пробуем взять из пути URL
+            if (!identifier) {
+                const pathParts = window.location.pathname.split('/').filter(p => p);
+                if (pathParts.length > 1 && pathParts[0] === 'verify') {
+                    identifier = pathParts[1];
+                }
+            }
 
-    loadVerification();
-  </script>
+            if (!identifier) {
+                loading.classList.add('hidden');
+                errorCard.classList.remove('hidden');
+                return;
+            }
+
+            // Запрос верификации к бэкенду
+            fetch(`/api/verify/${encodeURIComponent(identifier)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Verification failed');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    loading.classList.add('hidden');
+                    if (data.status === 'verified' && data.video_url) {
+                        displayTrackingId.textContent = data.tracking_id || identifier;
+                        displayHash.textContent = data.sha256 || 'N/A';
+                        videoPlayer.src = data.video_url;
+                        successContent.classList.remove('hidden');
+                    } else {
+                        errorCard.classList.remove('hidden');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching verification:', err);
+                    loading.classList.add('hidden');
+                    errorCard.classList.remove('hidden');
+                });
+        });
+    </script>
 </body>
 </html>
