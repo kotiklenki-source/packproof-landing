@@ -3,7 +3,9 @@ import sqlite3
 import json
 import hashlib
 import qrcode
+import boto3
 from io import BytesIO
+from botocore.config import Config
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
@@ -11,16 +13,25 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="PackProof Inspection API")
 
-# 1. Определение путей к папкам
+# --- НАСТРОЙКИ CLOUDFLARE R2 ---
+R2_ACCESS_KEY_ID = "54340d792c9c2fccfa2128602ef9bd8e"
+R2_SECRET_ACCESS_KEY = "46f9c14bc015a11189d2a342dna10299983b3e1076uf30c85c770dbffa340cf8"
+R2_ENDPOINT_URL = "https://1ff6eaee49a620894ec41d70b1840a85.r2.cloudflarestorage.com"
+R2_BUCKET_NAME = "packproof-videos"
+
+# Клиент S3 / R2
+s3_client = boto3.client(
+    's3',
+    endpoint_url=R2_ENDPOINT_URL,
+    aws_access_key_id=R2_ACCESS_KEY_ID,
+    aws_secret_access_key=R2_SECRET_ACCESS_KEY,
+    config=Config(signature_version='s3v4'),
+    region_name='auto'
+)
+
+#Пути к локальной БД (для индексации)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, ".."))
-
-# Если файлы видео сохраняются в uploaded_videos
-UPLOAD_DIR = os.path.join(PROJECT_ROOT, "uploaded_videos")
-if not os.path.exists(UPLOAD_DIR):
-    UPLOAD_DIR = os.path.join(PROJECT_ROOT, "uploads")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-
 DB_PATH = os.path.join(PROJECT_ROOT, "packproof.db")
 JSON_DB_PATH = os.path.join(PROJECT_ROOT, "db.json")
 
@@ -32,7 +43,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Инициализация SQLite базы данных
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -40,7 +50,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS videos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             tracking_id TEXT NOT NULL,
-            filename TEXT NOT NULL,
+            r2_key TEXT NOT NULL,
             sha256 TEXT NOT NULL
         )
     ''')
@@ -48,9 +58,6 @@ def init_db():
     conn.close()
 
 init_db()
-
-# Вспомогательное хранилище в памяти
-video_db = {}
 
 def load_json_db():
     if os.path.exists(JSON_DB_PATH):
@@ -68,7 +75,7 @@ def save_json_db(data):
 video_db = load_json_db()
 
 
-# --- Маршруты для страниц ---
+# --- Маршруты страниц ---
 
 @app.get("/")
 async def read_root():
@@ -90,19 +97,23 @@ async def upload_video(file: UploadFile = File(...), tracking_id: str = Form(...
     try:
         contents = await file.read()
         sha256_hash = hashlib.sha256(contents).hexdigest()
-        file_extension = os.path.splitext(file.filename)[1] or ".webm"
-        saved_filename = f"{tracking_id}_{sha256_hash[:8]}{file_extension}"
-        file_path = os.path.join(UPLOAD_DIR, saved_filename)
-        
-        with open(file_path, "wb") as f:
-            f.write(contents)
-            
-        # Сохранение в SQLite
+        file_ext = os.path.splitext(file.filename)[1] or ".webm"
+        r2_key = f"{tracking_id}_{sha256_hash[:8]}{file_ext}"
+
+        # Загрузка видео напрямую в бакет Cloudflare R2
+        s3_client.put_object(
+            Bucket=R2_BUCKET_NAME,
+            Key=r2_key,
+            Body=contents,
+            ContentType=file.content_type or "video/webm"
+        )
+
+        # Сохранение записи в SQLite
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO videos (tracking_id, filename, sha256) VALUES (?, ?, ?)",
-            (tracking_id, saved_filename, sha256_hash)
+            "INSERT INTO videos (tracking_id, r2_key, sha256) VALUES (?, ?, ?)",
+            (tracking_id, r2_key, sha256_hash)
         )
         conn.commit()
         conn.close()
@@ -110,16 +121,16 @@ async def upload_video(file: UploadFile = File(...), tracking_id: str = Form(...
         # Дублирование в JSON
         video_info = {
             "tracking_id": tracking_id,
-            "filename": saved_filename,
+            "r2_key": r2_key,
             "sha256": sha256_hash
         }
         video_db[sha256_hash] = video_info
         video_db[tracking_id] = video_info
         save_json_db(video_db)
-        
+
         return {
             "status": "success",
-            "message": "Video uploaded and verified successfully",
+            "message": "Video uploaded to R2 successfully",
             "tracking_id": tracking_id,
             "sha256": sha256_hash
         }
@@ -134,48 +145,55 @@ async def generate_qr(tracking_id: str):
     qr.add_data(verify_url)
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
-    
+
     img_byte_arr = BytesIO()
     img.save(img_byte_arr, format='PNG')
     img_byte_arr.seek(0)
-    
+
     return StreamingResponse(img_byte_arr, media_type="image/png")
 
 
 @app.get("/api/verify/{identifier}")
 async def verify_video(identifier: str):
-    # 1. Поиск в SQLite
+    r2_key = None
+    tracking_id = identifier
+    sha256_hash = ""
+
+    # Поиск записи в БД
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT tracking_id, filename, sha256 FROM videos WHERE tracking_id = ? OR sha256 = ?",
+        "SELECT tracking_id, r2_key, sha256 FROM videos WHERE tracking_id = ? OR sha256 = ?",
         (identifier, identifier)
     )
     row = cursor.fetchone()
     conn.close()
 
     if row:
-        return {
-            "status": "verified",
-            "tracking_id": row[0],
-            "sha256": row[2],
-            "video_url": f"/uploads/{row[1]}"
-        }
+        tracking_id, r2_key, sha256_hash = row[0], row[1], row[2]
+    else:
+        video_info = video_db.get(identifier)
+        if video_info:
+            tracking_id = video_info["tracking_id"]
+            r2_key = video_info["r2_key"]
+            sha256_hash = video_info["sha256"]
 
-    # 2. Фолбэк на JSON/память
-    video_info = video_db.get(identifier)
-    if video_info:
-        return {
-            "status": "verified",
-            "tracking_id": video_info["tracking_id"],
-            "sha256": video_info["sha256"],
-            "video_url": f"/uploads/{video_info['filename']}"
-        }
+    if not r2_key:
+        raise HTTPException(status_code=404, detail="Proof record not found")
 
-    raise HTTPException(status_code=404, detail="Proof record not found")
+    # Генерация временной прямой ссылки для безопасного просмотра прямо из R2
+    signed_url = s3_client.generate_presigned_url(
+        'get_object',
+        Params={'Bucket': R2_BUCKET_NAME, 'Key': r2_key},
+        ExpiresIn=3600  # Ссылка действительна 1 час
+    )
+
+    return {
+        "status": "verified",
+        "tracking_id": tracking_id,
+        "sha256": sha256_hash,
+        "video_url": signed_url
+    }
 
 
-# --- Монтирование папок со статикой ---
-
-app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 app.mount("/", StaticFiles(directory=PROJECT_ROOT, html=True), name="static")
