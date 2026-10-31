@@ -13,13 +13,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="PackProof Inspection API")
 
-# --- НАСТРОЙКИ CLOUDFLARE R2 ---
+# --- NASTROYKI CLOUDFLARE R2 ---
 R2_ACCESS_KEY_ID = "54340d792c9c2fccfa2128602ef9bd8e"
-R2_SECRET_ACCESS_KEY = "46f9c14bc015a11189d2a342dna10299983b3e1076uf30c85c770dbffa340cf8"
+R2_SECRET_ACCESS_KEY = "a813faf3be2b34eb4fd90528bf91282c498ea1995854d9ac2e1eaa6166fc91b0"
 R2_ENDPOINT_URL = "https://1ff6eaee49a620894ec41d70b1840a85.r2.cloudflarestorage.com"
 R2_BUCKET_NAME = "packproof-videos"
 
-# Клиент S3 / R2
+# Klient S3 / R2
 s3_client = boto3.client(
     's3',
     endpoint_url=R2_ENDPOINT_URL,
@@ -29,7 +29,6 @@ s3_client = boto3.client(
     region_name='auto'
 )
 
-#Пути к локальной БД (для индексации)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, ".."))
 DB_PATH = os.path.join(PROJECT_ROOT, "packproof.db")
@@ -75,8 +74,6 @@ def save_json_db(data):
 video_db = load_json_db()
 
 
-# --- Маршруты страниц ---
-
 @app.get("/")
 async def read_root():
     return FileResponse(os.path.join(PROJECT_ROOT, "index.html"))
@@ -90,17 +87,21 @@ async def read_verify():
     return FileResponse(os.path.join(PROJECT_ROOT, "verify.html"))
 
 
-# --- Бэкенд API ---
-
 @app.post("/api/upload")
-async def upload_video(file: UploadFile = File(...), tracking_id: str = Form(...)):
+async def upload_video(
+    file: UploadFile = File(...), 
+    tracking_id: str = Form(None),
+    id: str = Form(None),
+    order_id: str = Form(None)
+):
     try:
+        final_tracking_id = tracking_id or id or order_id or "UNKNOWN"
+        
         contents = await file.read()
         sha256_hash = hashlib.sha256(contents).hexdigest()
         file_ext = os.path.splitext(file.filename)[1] or ".webm"
-        r2_key = f"{tracking_id}_{sha256_hash[:8]}{file_ext}"
+        r2_key = f"{final_tracking_id}_{sha256_hash[:8]}{file_ext}"
 
-        # Загрузка видео напрямую в бакет Cloudflare R2
         s3_client.put_object(
             Bucket=R2_BUCKET_NAME,
             Key=r2_key,
@@ -108,33 +109,32 @@ async def upload_video(file: UploadFile = File(...), tracking_id: str = Form(...
             ContentType=file.content_type or "video/webm"
         )
 
-        # Сохранение записи в SQLite
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
         cursor.execute(
             "INSERT INTO videos (tracking_id, r2_key, sha256) VALUES (?, ?, ?)",
-            (tracking_id, r2_key, sha256_hash)
+            (final_tracking_id, r2_key, sha256_hash)
         )
         conn.commit()
         conn.close()
 
-        # Дублирование в JSON
         video_info = {
-            "tracking_id": tracking_id,
+            "tracking_id": final_tracking_id,
             "r2_key": r2_key,
             "sha256": sha256_hash
         }
         video_db[sha256_hash] = video_info
-        video_db[tracking_id] = video_info
+        video_db[final_tracking_id] = video_info
         save_json_db(video_db)
 
         return {
             "status": "success",
             "message": "Video uploaded to R2 successfully",
-            "tracking_id": tracking_id,
+            "tracking_id": final_tracking_id,
             "sha256": sha256_hash
         }
     except Exception as e:
+        print(f"UPLOAD ERROR: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -159,7 +159,6 @@ async def verify_video(identifier: str):
     tracking_id = identifier
     sha256_hash = ""
 
-    # Поиск записи в БД
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute(
@@ -181,11 +180,10 @@ async def verify_video(identifier: str):
     if not r2_key:
         raise HTTPException(status_code=404, detail="Proof record not found")
 
-    # Генерация временной прямой ссылки для безопасного просмотра прямо из R2
     signed_url = s3_client.generate_presigned_url(
         'get_object',
         Params={'Bucket': R2_BUCKET_NAME, 'Key': r2_key},
-        ExpiresIn=3600  # Ссылка действительна 1 час
+        ExpiresIn=3600
     )
 
     return {
