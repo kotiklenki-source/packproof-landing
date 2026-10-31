@@ -19,14 +19,19 @@ R2_SECRET_ACCESS_KEY = "a813faf3be2b34eb4fd90528bf91282c498ea1995854d9ac2e1eaa61
 R2_ENDPOINT_URL = "https://1ff6eaee49a620894ec41d70b1840a85.r2.cloudflarestorage.com"
 R2_BUCKET_NAME = "packproof-videos"
 
-# Клиент S3 / R2 для Cloudflare
+# Конфигурация для Cloudflare R2
+s3_config = Config(
+    region_name='auto',
+    signature_version='s3v4',
+    s3={'addressing_style': 'path'}
+)
+
 s3_client = boto3.client(
     's3',
     endpoint_url=R2_ENDPOINT_URL,
     aws_access_key_id=R2_ACCESS_KEY_ID,
     aws_secret_access_key=R2_SECRET_ACCESS_KEY,
-    region_name='us-east-1',
-    config=Config(signature_version='s3v4')
+    config=s3_config
 )
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
