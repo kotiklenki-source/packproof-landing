@@ -13,20 +13,20 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="PackProof Inspection API")
 
-# --- NASTROYKI CLOUDFLARE R2 ---
+# --- НАСТРОЙКИ CLOUDFLARE R2 ---
 R2_ACCESS_KEY_ID = "54340d792c9c2fccfa2128602ef9bd8e"
 R2_SECRET_ACCESS_KEY = "a813faf3be2b34eb4fd90528bf91282c498ea1995854d9ac2e1eaa6166fc91b0"
 R2_ENDPOINT_URL = "https://1ff6eaee49a620894ec41d70b1840a85.r2.cloudflarestorage.com"
 R2_BUCKET_NAME = "packproof-videos"
 
-# Klient S3 / R2
+# Клиент S3 / R2 для Cloudflare
 s3_client = boto3.client(
     's3',
     endpoint_url=R2_ENDPOINT_URL,
     aws_access_key_id=R2_ACCESS_KEY_ID,
     aws_secret_access_key=R2_SECRET_ACCESS_KEY,
-    config=Config(signature_version='s3v4'),
-    region_name='auto'
+    region_name='us-east-1',
+    config=Config(signature_version='s3v4')
 )
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -74,6 +74,8 @@ def save_json_db(data):
 video_db = load_json_db()
 
 
+# --- Маршруты страниц ---
+
 @app.get("/")
 async def read_root():
     return FileResponse(os.path.join(PROJECT_ROOT, "index.html"))
@@ -86,6 +88,8 @@ async def read_app():
 async def read_verify():
     return FileResponse(os.path.join(PROJECT_ROOT, "verify.html"))
 
+
+# --- Бэкенд API ---
 
 @app.post("/api/upload")
 async def upload_video(
