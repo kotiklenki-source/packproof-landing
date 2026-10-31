@@ -7,28 +7,40 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #0f172a; color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        header { width: 100%; max-width: 800px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        h1 { font-size: 1.5rem; color: #38bdf8; }
+        header { width: 100%; max-width: 800px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 10px; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .home-link { color: #94a3b8; text-decoration: none; font-weight: 600; font-size: 0.9rem; padding: 6px 12px; background: #1e293b; border: 1px solid #334155; border-radius: 6px; transition: 0.2s; }
+        .home-link:hover { color: #38bdf8; border-color: #38bdf8; }
+        h1 { font-size: 1.4rem; color: #38bdf8; }
         .lang-select { background: #1e293b; color: #fff; border: 1px solid #334155; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
         .card { background: #1e293b; border-radius: 12px; padding: 24px; width: 100%; max-width: 800px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
         .video-container { width: 100%; height: 360px; background: #000; border-radius: 8px; overflow: hidden; position: relative; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; }
         video { width: 100%; height: 100%; object-fit: cover; }
         .controls { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
-        button { background: #0284c7; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; flex: 1; min-width: 140px; }
+        button { background: #0284c7; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; flex: 1; min-width: 140px; font-size: 1rem; }
         button:hover { background: #0369a1; }
         button:disabled { background: #475569; cursor: not-allowed; }
-        button.stop { background: #dc2626; }
-        button.stop:hover { background: #b91c1c; }
+        button.action-btn { background: #0284c7; }
+        button.recording-btn { background: #dc2626; animation: pulse 1.5s infinite; }
+        button.upload-btn { background: #16a34a; }
+        button.upload-btn:hover { background: #15803d; }
+        button.secondary-btn { background: #334155; }
+        button.secondary-btn:hover { background: #475569; }
         input[type="text"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; margin-bottom: 15px; font-size: 1rem; }
         .status { padding: 12px; border-radius: 8px; background: #334155; margin-top: 15px; font-size: 0.9rem; display: none; }
-        .qr-result { margin-top: 20px; text-align: center; display: none; }
-        .qr-result img { width: 200px; height: 200px; border-radius: 8px; margin-top: 10px; }
+        .qr-result { margin-top: 20px; text-align: center; display: none; background: #0f172a; padding: 20px; border-radius: 8px; }
+        .qr-result img { width: 200px; height: 200px; border-radius: 8px; margin: 15px 0; background: #fff; padding: 10px; }
+        .qr-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>PackProof Inspection</h1>
+        <div class="header-left">
+            <a href="/" class="home-link" id="btnHome">← Home</a>
+            <h1 id="txtAppTitle">PackProof Inspection</h1>
+        </div>
         <select id="langSelect" class="lang-select" onchange="changeLanguage(this.value)">
             <option value="de">🇩🇪 Deutsch</option>
             <option value="en">🇬🇧 English</option>
@@ -45,61 +57,112 @@
         </div>
 
         <div class="controls">
-            <button id="btnStartCamera" onclick="startCamera()">Start Camera</button>
-            <button id="btnStartRec" onclick="startRecording()" disabled>Start Recording</button>
-            <button id="btnStopRec" class="stop" onclick="stopRecording()" disabled>Stop Recording</button>
-            <button id="btnUpload" onclick="uploadVideo()" disabled>Upload & Verify</button>
+            <!-- Умная кнопка камеры/записи -->
+            <button id="btnMain" class="action-btn" onclick="handleMainButtonClick()">Kamera starten</button>
+            
+            <!-- Кнопка загрузки -->
+            <button id="btnUpload" class="upload-btn" onclick="uploadVideo()" disabled>Hochladen & Verifizieren</button>
         </div>
 
         <div id="statusBox" class="status"></div>
 
+        <!-- Секция после успешной загрузки -->
         <div id="qrResult" class="qr-result">
             <h3 id="txtQrSuccess">Verification QR Code:</h3>
             <img id="qrImage" src="" alt="QR Code" />
+            
+            <div class="qr-actions">
+                <button class="secondary-btn" onclick="downloadQR()" id="btnDownloadQr">QR-Code herunterladen</button>
+                <button class="action-btn" onclick="resetForNextVideo()" id="btnNextVideo">Nächstes Video aufnehmen 🔄</button>
+            </div>
         </div>
     </div>
 
     <script>
         const translations = {
             de: {
+                home: "← Startseite",
                 title: "PackProof Inspektion",
                 placeholder: "Sendungsnummer / Bestellnummer eingeben",
                 startCam: "Kamera starten",
                 startRec: "Aufnahme starten",
-                stopRec: "Aufnahme stoppen",
+                stopRec: "Aufnahme stoppen ⏹",
                 upload: "Hochladen & Verifizieren",
-                camError: "Kamerazugriff fehlgeschlagen. Bitte HTTPS и Berechtigungen prüfen.",
-                qrTitle: "Bestätigungs-QR-Code:"
+                camError: "Kamerazugriff fehlgeschlagen. Bitte HTTPS und Berechtigungen prüfen.",
+                qrTitle: "Bestätigungs-QR-Code:",
+                camActive: "Kamera aktiviert",
+                recSaved: "Aufnahme gespeichert. Bereit zum Hochladen.",
+                recording: "Aufnahme läuft...",
+                noIdErr: "Bitte Sendungsnummer / Bestellnummer eingeben!",
+                noVideoErr: "Kein Video aufgenommen!",
+                uploading: "Wird hochgeladen und SHA-256 generiert...",
+                success: "Erfolg! SHA-256:",
+                netErr: "Fehler bei der Verbindung zum Server.",
+                downloadQr: "QR-Code herunterladen 💾",
+                nextVideo: "Nächstes Video aufnehmen 🔄"
             },
             en: {
+                home: "← Home",
                 title: "PackProof Inspection",
                 placeholder: "Enter Tracking ID / Order Number",
                 startCam: "Start Camera",
                 startRec: "Start Recording",
-                stopRec: "Stop Recording",
+                stopRec: "Stop Recording ⏹",
                 upload: "Upload & Verify",
                 camError: "Camera access failed. Check HTTPS and permissions.",
-                qrTitle: "Verification QR Code:"
+                qrTitle: "Verification QR Code:",
+                camActive: "Camera activated",
+                recSaved: "Recording saved. Ready for upload.",
+                recording: "Recording...",
+                noIdErr: "Please enter a Tracking ID / Order Number!",
+                noVideoErr: "No video recorded!",
+                uploading: "Uploading and generating SHA-256...",
+                success: "Success! SHA-256:",
+                netErr: "Error connecting to server.",
+                downloadQr: "Download QR Code 💾",
+                nextVideo: "Record Next Video 🔄"
             },
             ru: {
+                home: "← На главную",
                 title: "PackProof Инспекция",
                 placeholder: "Введите Трек-номер / Номер заказа",
                 startCam: "Включить камеру",
                 startRec: "Начать запись",
-                stopRec: "Остановить запись",
+                stopRec: "Остановить запись ⏹",
                 upload: "Загрузить и проверить",
                 camError: "Не удалось получить доступ к камере. Проверьте HTTPS и разрешения.",
-                qrTitle: "QR-код проверки:"
+                qrTitle: "QR-код проверки:",
+                camActive: "Камера включена",
+                recSaved: "Запись сохранена. Готово к загрузке.",
+                recording: "Идет запись...",
+                noIdErr: "Введите трек-номер или номер заказа!",
+                noVideoErr: "Видео не записано!",
+                uploading: "Загрузка и генерация SHA-256...",
+                success: "Успешно! SHA-256:",
+                netErr: "Ошибка подключения к серверу.",
+                downloadQr: "Скачать QR-код 💾",
+                nextVideo: "Снять следующее видео 🔄"
             },
             uk: {
+                home: "← На головну",
                 title: "PackProof Інспекція",
                 placeholder: "Введіть Трек-номер / Номер замовлення",
                 startCam: "Увімкнути камеру",
                 startRec: "Розпочати запис",
-                stopRec: "Зупинити запис",
+                stopRec: "Зупинити запис ⏹",
                 upload: "Завантажити та перевірити",
                 camError: "Не вдалося отримати доступ до камери. Перевірте HTTPS та дозволи.",
-                qrTitle: "QR-код перевірки:"
+                qrTitle: "QR-код перевірки:",
+                camActive: "Камеру увімкнено",
+                recSaved: "Запис збережено. Готово до завантаження.",
+                recording: "Йде запис...",
+                noIdErr: "Введіть трек-номер або номер замовлення!",
+                noVideoErr: "Відео не записано!",
+                uploading: "Завантаження та генерація SHA-256...",
+                success: "Успішно! SHA-256:",
+                netErr: "Помилка підключення до сервера.",
+                downloadQr: "Завантажити QR-код 💾",
+                nextVideo: "Зняти наступне відео 🔄"
             }
         };
 
@@ -108,25 +171,57 @@
         let recordedChunks = [];
         let recordedBlob = null;
         let currentLang = 'de';
+        
+        // Состояния кнопки: 'off' -> 'ready' -> 'recording'
+        let cameraState = 'off';
 
         function changeLanguage(lang) {
             currentLang = lang;
             const t = translations[lang];
+            document.getElementById('btnHome').innerText = t.home;
+            document.getElementById('txtAppTitle').innerText = t.title;
             document.getElementById('trackingId').placeholder = t.placeholder;
-            document.getElementById('btnStartCamera').innerText = t.startCam;
-            document.getElementById('btnStartRec').innerText = t.startRec;
-            document.getElementById('btnStopRec').innerText = t.stopRec;
             document.getElementById('btnUpload').innerText = t.upload;
             document.getElementById('txtQrSuccess').innerText = t.qrTitle;
+            document.getElementById('btnDownloadQr').innerText = t.downloadQr;
+            document.getElementById('btnNextVideo').innerText = t.nextVideo;
+
+            updateMainButtonUI();
+        }
+
+        function updateMainButtonUI() {
+            const btn = document.getElementById('btnMain');
+            const t = translations[currentLang];
+
+            if (cameraState === 'off') {
+                btn.innerText = t.startCam;
+                btn.className = "action-btn";
+            } else if (cameraState === 'ready') {
+                btn.innerText = t.startRec;
+                btn.className = "action-btn";
+            } else if (cameraState === 'recording') {
+                btn.innerText = t.stopRec;
+                btn.className = "recording-btn";
+            }
+        }
+
+        async function handleMainButtonClick() {
+            if (cameraState === 'off') {
+                await startCamera();
+            } else if (cameraState === 'ready') {
+                startRecording();
+            } else if (cameraState === 'recording') {
+                stopRecording();
+            }
         }
 
         async function startCamera() {
             try {
                 mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 document.getElementById('preview').srcObject = mediaStream;
-                document.getElementById('btnStartRec').disabled = false;
-                document.getElementById('btnStartCamera').disabled = true;
-                showStatus("Camera activated", "#0284c7");
+                cameraState = 'ready';
+                updateMainButtonUI();
+                showStatus(translations[currentLang].camActive, "#0284c7");
             } catch (err) {
                 console.error(err);
                 showStatus(translations[currentLang].camError, "#dc2626");
@@ -140,28 +235,28 @@
             mediaRecorder.onstop = () => {
                 recordedBlob = new Blob(recordedChunks, { type: 'video/webm' });
                 document.getElementById('btnUpload').disabled = false;
-                showStatus("Recording saved. Ready for upload.", "#16a34a");
+                showStatus(translations[currentLang].recSaved, "#16a34a");
             };
             mediaRecorder.start();
-            document.getElementById('btnStartRec').disabled = true;
-            document.getElementById('btnStopRec').disabled = false;
-            showStatus("Recording...", "#dc2626");
+            cameraState = 'recording';
+            updateMainButtonUI();
+            showStatus(translations[currentLang].recording, "#dc2626");
         }
 
         function stopRecording() {
             mediaRecorder.stop();
-            document.getElementById('btnStopRec').disabled = true;
-            document.getElementById('btnStartRec').disabled = false;
+            cameraState = 'ready';
+            updateMainButtonUI();
         }
 
         async function uploadVideo() {
             const trackingId = document.getElementById('trackingId').value.trim();
             if (!trackingId) {
-                alert("Please enter a Tracking ID / Order Number!");
+                alert(translations[currentLang].noIdErr);
                 return;
             }
             if (!recordedBlob) {
-                alert("No video recorded!");
+                alert(translations[currentLang].noVideoErr);
                 return;
             }
 
@@ -169,14 +264,14 @@
             formData.append('file', recordedBlob, 'inspection.webm');
             formData.append('tracking_id', trackingId);
 
-            showStatus("Uploading and generating SHA-256...", "#0284c7");
+            showStatus(translations[currentLang].uploading, "#0284c7");
 
             try {
                 const response = await fetch('/api/upload', { method: 'POST', body: formData });
                 const data = await response.json();
 
                 if (response.ok) {
-                    showStatus(`Success! SHA-256: ${data.sha256.substring(0, 16)}...`, "#16a34a");
+                    showStatus(`${translations[currentLang].success} ${data.sha256.substring(0, 16)}...`, "#16a34a");
                     document.getElementById('qrImage').src = `/api/qr/${trackingId}`;
                     document.getElementById('qrResult').style.display = 'block';
                 } else {
@@ -184,8 +279,25 @@
                 }
             } catch (err) {
                 console.error(err);
-                showStatus("Error connecting to server.", "#dc2626");
+                showStatus(translations[currentLang].netErr, "#dc2626");
             }
+        }
+
+        function downloadQR() {
+            const trackingId = document.getElementById('trackingId').value.trim() || 'qr_code';
+            const imgUrl = document.getElementById('qrImage').src;
+            
+            const link = document.createElement('a');
+            link.href = imgUrl;
+            link.download = `PackProof_QR_${trackingId}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function resetForNextVideo() {
+            // Перезагрузка страницы для чистой записи следующего видео
+            window.location.reload();
         }
 
         function showStatus(msg, color) {
@@ -195,7 +307,7 @@
             box.innerText = msg;
         }
 
-        // Init language
+        // Инициализация языка
         changeLanguage('de');
     </script>
 </body>
