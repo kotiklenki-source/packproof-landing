@@ -4,6 +4,7 @@ import json
 import hashlib
 import qrcode
 import boto3
+import requests
 from io import BytesIO
 from botocore.config import Config
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
@@ -19,7 +20,7 @@ R2_SECRET_ACCESS_KEY = "a9642c38ce9615ea5e9ada512954d9ac1b89075c974f3d2b467bdab8
 R2_ENDPOINT_URL = "https://1ff6eaee49a620894ec41d70b1840a85.r2.cloudflarestorage.com"
 R2_BUCKET_NAME = "packproof-videos"
 
-# Настройка клиента boto3 без конфликтующих заголовков региона
+# Настройка клиента boto3
 s3_client = boto3.client(
     's3',
     endpoint_url=R2_ENDPOINT_URL,
@@ -106,14 +107,28 @@ async def upload_video(
         file_ext = os.path.splitext(file.filename)[1] or ".webm"
         r2_key = f"{final_tracking_id}_{sha256_hash[:8]}{file_ext}"
 
-        # Выгрузка файла в бакет
-        s3_client.put_object(
-            Bucket=R2_BUCKET_NAME,
-            Key=r2_key,
-            Body=contents,
-            ContentType=file.content_type or 'video/webm'
+        # 1. Генерируем преподписанный URL для загрузки PutObject
+        upload_url = s3_client.generate_presigned_url(
+            'put_object',
+            Params={
+                'Bucket': R2_BUCKET_NAME,
+                'Key': r2_key,
+                'ContentType': file.content_type or 'video/webm'
+            },
+            ExpiresIn=600
         )
 
+        # 2. Выполняем загрузку бинарных данных через прямой HTTP PUT запрос
+        response = requests.put(
+            upload_url,
+            data=contents,
+            headers={'Content-Type': file.content_type or 'video/webm'}
+        )
+
+        if response.status_code not in (200, 201):
+            raise Exception(f"R2 Upload HTTP Error {response.status_code}: {response.text}")
+
+        # 3. Сохраняем записи в БД
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
         cursor.execute(
