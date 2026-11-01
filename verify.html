@@ -39,67 +39,22 @@
             gap: 16px;
         }
 
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-logo-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .ppi-badge {
-            background: rgba(34, 197, 94, 0.15);
-            border: 1px solid var(--ppi-green);
-            color: var(--ppi-green);
-            font-weight: 900;
-            font-size: 0.75rem;
-            padding: 3px 7px;
-            border-radius: 6px;
-        }
-
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        .header-logo-group { display: flex; align-items: center; gap: 8px; }
+        .ppi-badge { background: rgba(34, 197, 94, 0.15); border: 1px solid var(--ppi-green); color: var(--ppi-green); font-weight: 900; font-size: 0.75rem; padding: 3px 7px; border-radius: 6px; }
         .header h1 { margin: 0; font-size: 1.35rem; }
         .header h1 a { color: var(--accent); text-decoration: none; }
+        .lang-select { background: #334155; border: 1px solid #475569; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
 
-        .lang-select {
-            background: #334155;
-            border: 1px solid #475569;
-            color: #fff;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-
-        .status-badge {
-            background: rgba(34, 197, 94, 0.15);
-            border: 1px solid var(--ppi-green);
-            color: #4ade80;
-            padding: 10px;
-            border-radius: 8px;
-            font-weight: 600;
-            text-align: center;
-        }
-
+        .status-badge { background: rgba(34, 197, 94, 0.15); border: 1px solid var(--ppi-green); color: #4ade80; padding: 10px; border-radius: 8px; font-weight: 600; text-align: center; }
         .video-box { width: 100%; aspect-ratio: 4/3; background: #000; border-radius: 12px; overflow: hidden; }
         video { width: 100%; height: 100%; object-fit: cover; }
 
-        .info-card {
-            background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px;
-            display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem;
-        }
-
+        .info-card { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
         .info-row { display: flex; justify-content: space-between; color: var(--subtext); }
         .info-row span.val { color: #fff; font-weight: 600; word-break: break-all; }
 
-        .unboxing-section {
-            background: #0f172a; border: 1px dashed var(--accent); border-radius: 8px; padding: 16px;
-            display: flex; flex-direction: column; gap: 10px; text-align: center;
-        }
-
+        .unboxing-section { background: #0f172a; border: 1px dashed var(--accent); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px; text-align: center; }
         input { background: #334155; border: 1px solid #475569; color: #fff; padding: 10px; border-radius: 6px; outline: none; }
 
         button { padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
@@ -107,48 +62,28 @@
         .btn-success { background: var(--ppi-green); color: #fff; }
         .btn-outline { background: transparent; border: 1px solid #475569; color: #fff; }
 
-        /* Модальное окно успешной загрузки */
-        .modal-overlay {
-            position: fixed; top:0; left:0; right:0; bottom:0;
-            background: rgba(0,0,0,0.85); display: none;
-            justify-content: center; align-items: center; z-index: 100; padding: 20px;
-        }
+        .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 100; padding: 20px; }
+        .modal-card { background: var(--card-bg); border-radius: 16px; padding: 24px; max-width: 400px; width: 100%; text-align: center; border: 1px solid var(--ppi-green); display: flex; flex-direction: column; gap: 14px; }
 
-        .modal-card {
-            background: var(--card-bg); border-radius: 16px; padding: 24px;
-            max-width: 400px; width: 100%; text-align: center;
-            border: 1px solid var(--ppi-green); display: flex; flex-direction: column; gap: 14px;
-        }
-
-        /* ПЕЧАТНЫЕ СТИЛИ ДЛЯ PDF */
         .print-only { display: none; }
 
         @media print {
             body { background: #fff !important; color: #000 !important; padding: 0; margin: 0; }
             .container { box-shadow: none !important; border: none !important; max-width: 100% !important; padding: 10px !important; }
             button, .unboxing-section, .lang-select, .video-box, .modal-overlay { display: none !important; }
-            
             .print-only { display: block !important; }
             
-            .pdf-header {
-                border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 16px; text-align: center;
-            }
-
+            .pdf-header { border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 16px; text-align: center; }
             .pdf-title { font-size: 20px; font-weight: bold; color: #0f172a; margin: 0; }
             .pdf-subtitle { font-size: 12px; color: #475569; margin-top: 4px; }
 
-            .pdf-block {
-                border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 12px; background: #f8fafc;
-            }
-
+            .pdf-block { border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 12px; background: #f8fafc; }
             .pdf-block h4 { margin: 0 0 8px 0; color: #0f172a; font-size: 14px; }
             .pdf-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; }
             .pdf-row .label { color: #475569; }
             .pdf-row .value { font-weight: bold; color: #0f172a; font-family: monospace; }
 
-            .pdf-verdict {
-                border: 2px solid #22c55e; background: #f0fdf4; border-radius: 8px; padding: 12px; text-align: center; margin-top: 16px;
-            }
+            .pdf-verdict { border: 2px solid #22c55e; background: #f0fdf4; border-radius: 8px; padding: 12px; text-align: center; margin-top: 16px; }
             .pdf-verdict-title { font-weight: bold; color: #166534; font-size: 14px; }
             .pdf-verdict-desc { font-size: 11px; color: #15803d; margin-top: 4px; }
         }
@@ -175,15 +110,13 @@
 
     <div id="content" style="display:none; flex-direction:column; gap:16px;">
         
-        <!-- Заголовок для PDF печать -->
         <div class="print-only pdf-header">
             <div class="pdf-title">PackProof Inspection — Official Audit Certificate</div>
-            <div class="pdf-subtitle">Zweiseitiger Verpackungs- & Auspacknachweis (Криптографический сертификат)</div>
+            <div class="pdf-subtitle">Zweiseitiger Verpackungs- & Auspacknachweis</div>
         </div>
 
         <div class="status-badge" id="t-status">✅ Verifiziert & Gesichert</div>
 
-        <!-- Видео продавца (скрывается при печати) -->
         <h3 id="t-seller-title">📦 Verpackung durch Verkäufer:</h3>
         <div class="video-box">
             <video id="videoPlayer" controls playsinline></video>
@@ -195,7 +128,7 @@
             <div class="info-row"><span>Status:</span><span class="val" style="color:#22c55e;" id="t-val-status">Original unverändert</span></div>
         </div>
 
-        <!-- Блок печатного вида Продавца (виден только в PDF) -->
+        <!-- PDF Блок Продавца -->
         <div class="print-only pdf-block">
             <h4 id="t-pdf-seller-head">📦 Verkäufer-Nachweis (Packing Proof)</h4>
             <div class="pdf-row"><span class="label">Status:</span><span class="value" style="color:#166534;">VERIFIED & HASHED</span></div>
@@ -203,26 +136,23 @@
             <div class="pdf-row"><span class="label">Cloud Storage:</span><span class="value">Encrypted Cloudflare R2 Store</span></div>
         </div>
 
-        <!-- Видео покупателя (скрывается при печати) -->
         <div id="unboxingDisplay" style="display:none;" class="video-box">
             <h3 id="t-buyer-title">🎁 Auspacken durch Käufer:</h3>
             <video id="unboxingPlayer" controls playsinline></video>
         </div>
 
-        <!-- Блок печатного вида Покупателя (виден только в PDF) -->
+        <!-- PDF Блок Покупателя -->
         <div class="print-only pdf-block" id="pdfBuyerBlock">
             <h4 id="t-pdf-buyer-head">🎁 Käufer-Nachweis (Unboxing Proof)</h4>
-            <div class="pdf-row"><span class="label">Unboxing Status:</span><span class="value" id="pdfBuyerStatus">RECORDED & VERIFIED</span></div>
-            <div class="pdf-row"><span class="label">System Audit:</span><span class="value">PIN Authenticated</span></div>
+            <div class="pdf-row"><span class="label">Unboxing Status:</span><span class="value" id="pdfBuyerStatus" style="color:#166534;">WAITING FOR UNBOXING</span></div>
+            <div class="pdf-row"><span class="label">System Audit:</span><span class="value" id="pdfBuyerAudit">PIN Authentication Pending</span></div>
         </div>
 
-        <!-- Раздел Вердикта для PDF -->
         <div class="print-only pdf-verdict">
-            <div class="pdf-verdict-title" id="t-pdf-verdict-title">⚖️ AUDIT ZERTIFIZIERT / СЕРТИФИКАТ АУДИТА</div>
-            <div class="pdf-verdict-desc" id="t-pdf-verdict-desc">Dieses Dokument bestätigt die Aufzeichnung der Verpackungs- und Auspackdaten in der unveränderlichen PackProof-Datenbank.</div>
+            <div class="pdf-verdict-title" id="t-pdf-verdict-title">⚖️ PACKPROOF AUDIT ZERTIFIZIERT</div>
+            <div class="pdf-verdict-desc" id="t-pdf-verdict-desc">Dieses Dokument bestätigt die unveränderliche Speicherung der Videodaten im PackProof-Register.</div>
         </div>
 
-        <!-- Авторизация покупателя -->
         <div class="unboxing-section" id="buyerAuthBox">
             <h4 style="margin:0;" id="t-auth-title">🔒 Käufer-Authentifizierung</h4>
             <p style="margin:0; font-size:0.8rem; color:var(--subtext);" id="t-auth-desc">Geben Sie den PIN-Code aus Ihrer Sendung ein, um das Auspack-Video aufzunehmen:</p>
@@ -239,13 +169,12 @@
     </div>
 </div>
 
-<!-- Модальное окно успешной выгрузки распаковки -->
 <div class="modal-overlay" id="successModal">
     <div class="modal-card">
         <div style="font-size: 2.5rem;">🎉</div>
         <h3 style="margin:0; color:var(--ppi-green);" id="t-modal-title">Unboxing-Video gespeichert!</h3>
         <p style="margin:0; font-size:0.85rem; color:#cbd5e1;" id="t-modal-desc">Ihr Auspack-Video wurde erfolgreich mit der Sendung verknüpft. Der Prüfbericht ist nun vollständig.</p>
-        <button onclick="window.print()" class="btn-success" id="t-modal-btn-pdf">📄 Prüfbericht als PDF herunterladen</button>
+        <button onclick="window.print()" class="btn-success" id="t-modal-btn-pdf">📄 Prüfbericht als PDF drucken</button>
         <a href="/" class="btn-outline" style="text-decoration:none;" id="t-modal-btn-home">🏠 Zur Startseite</a>
     </div>
 </div>
@@ -265,18 +194,18 @@
             btnStopRec: "⏹️ Stoppen & Hochladen",
             errPin: "Falscher PIN-Code!",
             modalTitle: "Unboxing-Video gespeichert!",
-            modalDesc: "Ihr Auspack-Video wurde erfolgreich mit der Sendung verknüpft. Der Prüfbericht ist nun vollständig.",
+            modalDesc: "Ihr Auspack-Video wurde erfolgreich verknüpft. Der Prüfbericht ist nun vollständig.",
             modalBtnPdf: "📄 Prüfbericht als PDF drucken",
             modalBtnHome: "🏠 Zur Startseite",
             pdfSellerHead: "📦 Verkäufer-Nachweis (Packing Proof)",
             pdfBuyerHead: "🎁 Käufer-Nachweis (Unboxing Proof)",
             pdfVerdictTitle: "⚖️ PACKPROOF AUDIT ZERTIFIZIERT",
-            pdfVerdictDesc: "Dieses Dokument bestätigt die unveränderliche Speicherung beider Video-Nachweise im PackProof-Register."
+            pdfVerdictDesc: "Dieses Dokument bestätigt die unveränderliche Speicherung im PackProof-Register."
         },
         en: {
             status: "✅ Verified & Secured",
             sellerTitle: "📦 Seller Packing Proof:",
-            buyerTitle: "GIF Buyer Unboxing Proof:",
+            buyerTitle: "🎁 Buyer Unboxing Proof:",
             labelId: "Tracking ID:",
             authTitle: "🔒 Buyer Authentication",
             authDesc: "Enter the PIN code from your package to record unboxing video:",
@@ -286,7 +215,7 @@
             btnStopRec: "⏹️ Stop & Upload",
             errPin: "Incorrect PIN Code!",
             modalTitle: "Unboxing Video Saved!",
-            modalDesc: "Your unboxing video has been successfully attached. The audit report is now complete.",
+            modalDesc: "Your unboxing video has been attached. The audit report is complete.",
             modalBtnPdf: "📄 Print / Save PDF Report",
             modalBtnHome: "🏠 Go to Homepage",
             pdfSellerHead: "📦 Seller Packing Proof",
@@ -335,13 +264,11 @@
         document.getElementById('t-btn-auth').textContent = t.btnAuth;
         document.getElementById('t-btn-pdf').textContent = t.btnPdf;
 
-        // Модальное окно
         document.getElementById('t-modal-title').textContent = t.modalTitle;
         document.getElementById('t-modal-desc').textContent = t.modalDesc;
         document.getElementById('t-modal-btn-pdf').textContent = t.modalBtnPdf;
         document.getElementById('t-modal-btn-home').textContent = t.modalBtnHome;
 
-        // PDF элементы
         document.getElementById('t-pdf-seller-head').textContent = t.pdfSellerHead;
         document.getElementById('t-pdf-buyer-head').textContent = t.pdfBuyerHead;
         document.getElementById('t-pdf-verdict-title').textContent = t.pdfVerdictTitle;
@@ -376,9 +303,14 @@
                 document.getElementById('unboxingPlayer').src = data.unboxing_video_url;
                 document.getElementById('unboxingDisplay').style.display = 'block';
                 document.getElementById('buyerAuthBox').style.display = 'none';
-                document.getElementById('pdfBuyerStatus').textContent = "RECORDED & VERIFIED";
+                
+                // Статус после загрузки видео
+                document.getElementById('pdfBuyerStatus').textContent = "COMPLETE & VERIFIED";
+                document.getElementById('pdfBuyerAudit').textContent = "PIN Verified & Attached";
             } else {
-                document.getElementById('pdfBuyerStatus').textContent = "NOT RECORDED YET";
+                // Статус до загрузки видео
+                document.getElementById('pdfBuyerStatus').textContent = "WAITING FOR UNBOXING";
+                document.getElementById('pdfBuyerAudit').textContent = "PIN Authenticated Pending";
             }
 
             document.getElementById('loading').style.display = 'none';
@@ -395,12 +327,24 @@
         savedEnteredPin = pin;
 
         try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            // Включаем ЗАДНЮЮ камеру на телефоне покупателя
+            stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: { ideal: "environment" } }, 
+                audio: true 
+            });
             document.getElementById('camPreview').srcObject = stream;
             document.getElementById('buyerAuthBox').style.display = 'none';
             document.getElementById('camRecorderBox').style.display = 'flex';
         } catch (e) {
-            alert("Kamera-Zugriff fehlgeschlagen: " + e.message);
+            try {
+                // Запасной вариант если задняя недоступна
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                document.getElementById('camPreview').srcObject = stream;
+                document.getElementById('buyerAuthBox').style.display = 'none';
+                document.getElementById('camRecorderBox').style.display = 'flex';
+            } catch (err2) {
+                alert("Kamera-Zugriff fehlgeschlagen: " + err2.message);
+            }
         }
     }
 
@@ -431,7 +375,8 @@
 
                 const res = await fetch("/api/upload-unboxing", { method: "POST", body: formData });
                 if (res.ok) {
-                    // Показываем красивое модальное окно вместо обычного alert
+                    document.getElementById('pdfBuyerStatus').textContent = "COMPLETE & VERIFIED";
+                    document.getElementById('pdfBuyerAudit').textContent = "PIN Verified & Attached";
                     document.getElementById('successModal').style.display = 'flex';
                 } else {
                     const err = await res.json();

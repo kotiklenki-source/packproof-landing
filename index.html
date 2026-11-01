@@ -19,143 +19,109 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column; min-height: 100vh;
         }
 
         .navbar {
             background: var(--card-bg);
             border-bottom: 1px solid #334155;
             padding: 16px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: flex; justify-content: space-between; align-items: center;
         }
 
-        .logo-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
+        .logo-group { display: flex; align-items: center; gap: 10px; }
         .ppi-badge {
-            background: rgba(34, 197, 94, 0.15);
-            border: 1px solid var(--ppi-green);
-            color: var(--ppi-green);
-            font-weight: 900;
-            font-size: 0.8rem;
-            padding: 4px 8px;
-            border-radius: 6px;
-            letter-spacing: 0.5px;
+            background: rgba(34, 197, 94, 0.15); border: 1px solid var(--ppi-green);
+            color: var(--ppi-green); font-weight: 900; font-size: 0.8rem;
+            padding: 4px 8px; border-radius: 6px;
         }
 
-        .logo-text {
-            font-size: 1.35rem;
-            font-weight: 700;
-            margin: 0;
-        }
+        .logo-text { font-size: 1.35rem; font-weight: 700; margin: 0; }
+        .logo-text a { color: var(--accent); text-decoration: none; }
 
-        .logo-text a {
-            color: var(--accent);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .logo-text a:hover {
-            color: var(--accent-hover);
-        }
-
-        .nav-right {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
+        .nav-right { display: flex; gap: 12px; align-items: center; }
 
         .btn-app {
-            background: var(--ppi-green);
-            color: #fff;
-            padding: 8px 16px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: opacity 0.2s;
+            background: var(--ppi-green); color: #fff; padding: 8px 16px;
+            border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;
         }
 
-        .btn-app:hover { opacity: 0.9; }
-
         .lang-select {
-            background: #334155;
-            border: 1px solid #475569;
-            color: #fff;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            cursor: pointer;
+            background: #334155; border: 1px solid #475569; color: #fff;
+            padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; cursor: pointer;
         }
 
         .hero {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 40px 20px;
-            max-width: 800px;
-            margin: 0 auto;
+            display: flex; flex-direction: column; align-items: center;
+            text-align: center; padding: 50px 20px 30px; max-width: 800px; margin: 0 auto;
         }
 
-        /* Крупная иконка щита с галочкой */
         .shield-icon-container {
-            width: 80px;
-            height: 80px;
-            background: rgba(56, 189, 248, 0.1);
-            border: 2px solid var(--accent);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
+            width: 80px; height: 80px; background: rgba(56, 189, 248, 0.1);
+            border: 2px solid var(--accent); border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; margin-bottom: 20px;
             box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
         }
 
-        .shield-icon {
+        .hero h1 { font-size: 2.3rem; color: var(--accent); margin-bottom: 16px; }
+        .hero p { font-size: 1.1rem; color: var(--subtext); line-height: 1.6; margin-bottom: 32px; }
+
+        /* ИНТЕРАКТИВНЫЕ 3 КОЛОНКИ */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto 50px auto;
+            padding: 0 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        /* Эффект увеличения и подсветки при наведении мышкой */
+        .feature-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--accent);
+            box-shadow: 0 12px 30px -10px rgba(56, 189, 248, 0.3);
+            background: #1e293b;
+        }
+
+        .feature-icon {
             font-size: 2.5rem;
+            margin-bottom: 12px;
         }
 
-        .hero h1 {
-            font-size: 2.3rem;
+        .feature-card h3 {
+            margin: 0 0 8px 0;
             color: var(--accent);
-            margin-bottom: 16px;
+            font-size: 1.2rem;
         }
 
-        .hero p {
-            font-size: 1.1rem;
+        .feature-card p {
+            margin: 0;
+            font-size: 0.9rem;
             color: var(--subtext);
-            line-height: 1.6;
-            margin-bottom: 32px;
+            line-height: 1.5;
         }
 
         footer {
-            background: var(--card-bg);
-            border-top: 1px solid #334155;
-            padding: 20px;
-            text-align: center;
-            font-size: 0.85rem;
-            color: var(--subtext);
+            background: var(--card-bg); border-top: 1px solid #334155;
+            padding: 20px; text-align: center; font-size: 0.85rem; color: var(--subtext);
+            margin-top: auto;
         }
 
-        footer a {
-            color: var(--accent);
-            text-decoration: none;
-            margin: 0 10px;
-        }
-
-        footer a:hover { text-decoration: underline; }
+        footer a { color: var(--accent); text-decoration: none; margin: 0 10px; }
     </style>
 </head>
 <body>
@@ -178,25 +144,37 @@
     </nav>
 
     <main class="hero">
-        <!-- Фирменная иконка щита с галочкой -->
         <div class="shield-icon-container">
-            <span class="shield-icon">🛡️</span>
+            <span style="font-size: 2.5rem;">🛡️</span>
         </div>
-
         <h1 id="t-hero-title">Visuelle Verpackungssicherung</h1>
         <p id="t-hero-desc">
             PackProof Inspection ist die professionelle Komplettlösung für E-Commerce und Logistik. 
-            Sichern Sie Ihre Sendungen mit unmanipulierbaren Video-Nachweisen und schützen Sie sich vor unberechtigten Reklamationen.
+            Sichern Sie Ihre Sendungen mit unmanipulierbaren Video-Nachweisen.
         </p>
-        <a href="/app" class="btn-app" id="t-hero-btn" style="padding: 14px 28px; font-size: 1.1rem;">
-            Jetzt Inspektion starten
-        </a>
     </main>
 
-    <footer>
-        <div>
-            © PackProof Inspection System. Alle Rechte vorbehalten.
+    <!-- 3 ИНТЕРАКТИВНЫЕ КОЛОНКИ С АНИМАЦИЕЙ -->
+    <section class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">📹</div>
+            <h3 id="f1-title">Video-Verpackungsnachweis</h3>
+            <p id="f1-desc">Lückenlose Aufzeichnung des Verpackungsprozesses im Time-Lapse- oder Standardmodus.</p>
         </div>
+        <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3 id="f2-title">Zweiseitiges Unboxing</h3>
+            <p id="f2-desc">Sichere Käufer-Authentifizierung per PIN-Code für fälschungssichere Auspack-Videos.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📜</div>
+            <h3 id="f3-title">Prüfbericht & Zertifikat</h3>
+            <p id="f3-desc">Krypto-Prüfbericht mit SHA-256 Hash zur schnellen Klärung bei Transportschäden.</p>
+        </div>
+    </section>
+
+    <footer>
+        <div>© PackProof Inspection System. Alle Rechte vorbehalten.</div>
         <div style="margin-top: 8px;">
             <a href="/impressum.html">Impressum</a> | 
             <a href="/datenschutz.html">Datenschutzerklärung</a>
@@ -208,20 +186,35 @@
         de: {
             btnApp: "🚀 App starten",
             heroTitle: "Visuelle Verpackungssicherung & Qualitätsnachweis",
-            heroDesc: "PackProof Inspection ist die professionelle Komplettlösung für E-Commerce und Logistik. Sichern Sie Ihre Sendungen mit unmanipulierbaren Video-Nachweisen und schützen Sie sich vor unberechtigten Reklamationen.",
-            heroBtn: "Jetzt Inspektion starten"
+            heroDesc: "PackProof Inspection ist die professionelle Komplettlösung für E-Commerce und Logistik. Sichern Sie Ihre Sendungen mit unmanipulierbaren Video-Nachweisen.",
+            f1Title: "Video-Verpackungsnachweis",
+            f1Desc: "Lückenlose Aufzeichnung des Verpackungsprozesses im Time-Lapse- oder Standardmodus.",
+            f2Title: "Zweiseitiges Unboxing",
+            f2Desc: "Sichere Käufer-Authentifizierung per PIN-Code für fälschungssichere Auspack-Videos.",
+            f3Title: "Prüfbericht & Zertifikat",
+            f3Desc: "Krypto-Prüfbericht mit SHA-256 Hash zur schnellen Klärung bei Transportschäden."
         },
         en: {
             btnApp: "🚀 Launch App",
             heroTitle: "Visual Packing Verification & Proof System",
-            heroDesc: "PackProof Inspection is the professional all-in-one solution for e-commerce and logistics. Secure your shipments with tamper-proof video evidence and protect your business against unjustified claim disputes.",
-            heroBtn: "Start Inspection Now"
+            heroDesc: "PackProof Inspection is the professional all-in-one solution for e-commerce and logistics. Secure your shipments with tamper-proof video evidence.",
+            f1Title: "Packing Video Proof",
+            f1Desc: "Seamless recording of the packing process in Time-Lapse or Standard 1x mode.",
+            f2Title: "Two-Way Unboxing",
+            f2Desc: "Secure buyer authentication via PIN code for tamper-proof unboxing recordings.",
+            f3Title: "Audit Report Certificate",
+            f3Desc: "Cryptographic audit report with SHA-256 hash for fast dispute resolution."
         },
         ru: {
             btnApp: "🚀 Открыть приложение",
             heroTitle: "Визуальная фиксация упаковки и контроль качества",
-            heroDesc: "PackProof Inspection — профессиональное решение для e-commerce и логистики. Защитите отправки видеодоказательствами и исключите неквалифицированные споры и необоснованные возвраты.",
-            heroBtn: "Начать видеоинспекцию"
+            heroDesc: "PackProof Inspection — профессиональное решение для e-commerce и логистики. Защитите отправки видеодоказательствами.",
+            f1Title: "Видеофиксация упаковки",
+            f1Desc: "Запись процесса упаковки товара в ускоренном (Таймлапс) или обычном режиме.",
+            f2Title: "Двусторонняя распаковка",
+            f2Desc: "Авторизация покупателя по ПИН-коду для записи ответного видео распаковки.",
+            f3Title: "Аудиторский отчёт PDF",
+            f3Desc: "Криптографический сертификат с SHA-256 хэшем для решения спорных ситуаций."
         }
     };
 
@@ -232,7 +225,12 @@
         document.getElementById('t-btn-app').textContent = t.btnApp;
         document.getElementById('t-hero-title').textContent = t.heroTitle;
         document.getElementById('t-hero-desc').textContent = t.heroDesc;
-        document.getElementById('t-hero-btn').textContent = t.heroBtn;
+        document.getElementById('f1-title').textContent = t.f1Title;
+        document.getElementById('f1-desc').textContent = t.f1Desc;
+        document.getElementById('f2-title').textContent = t.f2Title;
+        document.getElementById('f2-desc').textContent = t.f2Desc;
+        document.getElementById('f3-title').textContent = t.f3Title;
+        document.getElementById('f3-desc').textContent = t.f3Desc;
     }
 
     function detectLanguage() {

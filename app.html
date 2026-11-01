@@ -382,10 +382,20 @@
 
     async function initCamera() {
         try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            // Пробуем запустить заднюю камеру
+            stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: { ideal: "environment" } }, 
+                audio: false 
+            });
             preview.srcObject = stream;
         } catch (err) {
-            showStatus("Kamera-Zugriff error: " + err.message, true);
+            try {
+                // Если нет задней (например, на веб-камере ПК), берём любую доступную
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                preview.srcObject = stream;
+            } catch (fallbackErr) {
+                showStatus("Kamera-Zugriff error: " + fallbackErr.message, true);
+            }
         }
     }
 
