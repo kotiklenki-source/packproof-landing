@@ -4,6 +4,7 @@ import json
 import hashlib
 import qrcode
 import boto3
+import time
 from io import BytesIO
 from botocore.config import Config
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
@@ -50,7 +51,7 @@ def init_db():
             tracking_id TEXT NOT NULL,
             r2_key TEXT NOT NULL,
             sha256 TEXT NOT NULL,
-            secret_pin TEXT DEFAULT '1234',
+            secret_pin TEXT DEFAULT '12345678',
             unboxing_r2_key TEXT DEFAULT NULL
         )
     ''')
@@ -90,7 +91,7 @@ async def read_verify():
 async def upload_video(
     file: UploadFile = File(...), 
     tracking_id: str = Form(None),
-    secret_pin: str = Form("1234")
+    secret_pin: str = Form("12345678")
 ):
     try:
         final_id = tracking_id or "ID_" + str(int(time.time()))
@@ -140,11 +141,11 @@ async def upload_unboxing(
     cursor.execute("SELECT secret_pin FROM videos WHERE tracking_id = ?", (tracking_id,))
     row = cursor.fetchone()
     
-    saved_pin = row[0] if row else video_db.get(tracking_id, {}).get("secret_pin", "1234")
+    saved_pin = row[0] if row else video_db.get(tracking_id, {}).get("secret_pin", "12345678")
     
     if str(saved_pin) != str(pin):
         conn.close()
-        raise HTTPException(status_code=403, detail="Falscher PIN / Неверный PIN-код")
+        raise HTTPException(status_code=403, detail="Falscher PIN / Wrong PIN")
 
     contents = await file.read()
     sha256_hash = hashlib.sha256(contents).hexdigest()

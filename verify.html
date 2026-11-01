@@ -9,8 +9,8 @@
             --bg-color: #0f172a;
             --card-bg: #1e293b;
             --accent: #38bdf8;
+            --ppi-green: #22c55e;
             --text-color: #f8fafc;
-            --success: #22c55e;
             --danger: #ef4444;
             --subtext: #94a3b8;
         }
@@ -39,11 +39,44 @@
             gap: 16px;
         }
 
-        .header h1 { margin: 0; font-size: 1.5rem; color: var(--accent); text-align: center; }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-logo-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ppi-badge {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid var(--ppi-green);
+            color: var(--ppi-green);
+            font-weight: 900;
+            font-size: 0.75rem;
+            padding: 3px 7px;
+            border-radius: 6px;
+        }
+
+        .header h1 { margin: 0; font-size: 1.5rem; }
+        .header h1 a { color: var(--accent); text-decoration: none; }
+
+        .lang-select {
+            background: #334155;
+            border: 1px solid #475569;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
 
         .status-badge {
             background: rgba(34, 197, 94, 0.15);
-            border: 1px solid var(--success);
+            border: 1px solid var(--ppi-green);
             color: #4ade80;
             padding: 10px;
             border-radius: 8px;
@@ -71,71 +104,149 @@
 
         button { padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
         .btn-primary { background: var(--accent); color: #000; }
-        .btn-success { background: var(--success); color: #fff; }
+        .btn-success { background: var(--ppi-green); color: #fff; }
         .btn-outline { background: transparent; border: 1px solid #475569; color: #fff; }
 
         @media print {
             body { background: #fff; color: #000; }
             .container { box-shadow: none; border: 1px solid #ccc; max-width: 100%; }
-            button, .unboxing-section { display: none !important; }
+            button, .unboxing-section, .lang-select { display: none !important; }
+            .status-badge { border-color: #000; color: #000; }
+            .info-card { background: #f9f9f9; border-color: #ccc; }
+            .info-row span.val { color: #000; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header">
-        <h1>PackProof Inspection</h1>
+    <div class="header-top">
+        <div class="header-logo-group">
+            <span class="ppi-badge">PPI</span>
+            <div class="header">
+                <h1><a href="/">PackProof</a></h1>
+            </div>
+        </div>
+        <select id="langSelect" class="lang-select">
+            <option value="de">🇩🇪 DE</option>
+            <option value="en">🇬🇧 EN</option>
+            <option value="ru">🇺🇦 RU</option>
+        </select>
     </div>
 
     <div id="loading" style="text-align:center;">Verifizierung läuft...</div>
 
     <div id="content" style="display:none; flex-direction:column; gap:16px;">
-        <div class="status-badge">✅ Verifiziert & Gesichert</div>
+        <div class="status-badge" id="t-status">✅ Verifiziert & Gesichert</div>
 
-        <h3>📦 Verpackung durch Verkäufer (Видео продавца):</h3>
+        <h3 id="t-seller-title">📦 Verpackung durch Verkäufer:</h3>
         <div class="video-box">
             <video id="videoPlayer" controls playsinline></video>
         </div>
 
         <div class="info-card">
-            <div class="info-row"><span>Sendungs-ID:</span><span class="val" id="dispTrackingId">-</span></div>
+            <div class="info-row"><span id="t-label-id">Sendungs-ID:</span><span class="val" id="dispTrackingId">-</span></div>
             <div class="info-row"><span>SHA-256 Hash:</span><span class="val" id="dispHash" style="font-size:0.75rem;">-</span></div>
         </div>
 
-        <!-- Раздел видео от покупателя -->
         <div id="unboxingDisplay" style="display:none;" class="video-box">
-            <h3>🎁 Auspacken durch Käufer (Ответное видео распаковки):</h3>
+            <h3 id="t-buyer-title">🎁 Auspacken durch Käufer:</h3>
             <video id="unboxingPlayer" controls playsinline></video>
         </div>
 
-        <!-- Кнопка и диалог для покупателя -->
         <div class="unboxing-section" id="buyerAuthBox">
-            <h4 style="margin:0;">📦 Системная авторизация покупателя</h4>
-            <p style="margin:0; font-size:0.8rem; color:var(--subtext);">Введите ПИН-код из SMS или упаковки, чтобы записать видео распаковки:</p>
-            <input type="password" id="pinInput" placeholder="PIN-Code (z.B. 1234)">
-            <button onclick="unlockUnboxing()" class="btn-primary">🔐 Авторизоваться и открыть камеру</button>
+            <h4 style="margin:0;" id="t-auth-title">🔒 Käufer-Authentifizierung</h4>
+            <p style="margin:0; font-size:0.8rem; color:var(--subtext);" id="t-auth-desc">Geben Sie den PIN-Code aus Ihrer Sendung ein, um das Auspack-Video aufzunehmen:</p>
+            <input type="password" id="pinInput" placeholder="PIN-Code (z. B. 12345678)">
+            <button onclick="unlockUnboxing()" class="btn-primary" id="t-btn-auth">🔐 Kamera öffnen</button>
         </div>
 
         <div class="unboxing-section" id="camRecorderBox" style="display:none;">
             <video id="camPreview" autoplay muted playsinline style="width:100%; border-radius:8px;"></video>
-            <button id="recBtn" onclick="toggleUnboxingRec()" class="btn-primary">🔴 Начать запись распаковки</button>
+            <button id="recBtn" onclick="toggleUnboxingRec()" class="btn-primary">🔴 Aufnahme starten</button>
         </div>
 
-        <button onclick="window.print()" class="btn-outline">📄 Сформировать двусторонний отчёт PDF</button>
+        <button onclick="window.print()" class="btn-outline" id="t-btn-pdf">📄 Prüfbericht als PDF drucken</button>
     </div>
 </div>
 
 <script>
+    const i18n = {
+        de: {
+            status: "✅ Verifiziert & Gesichert",
+            sellerTitle: "📦 Verpackung durch Verkäufer:",
+            buyerTitle: "🎁 Auspacken durch Käufer:",
+            labelId: "Sendungs-ID:",
+            authTitle: "🔒 Käufer-Authentifizierung",
+            authDesc: "Geben Sie den PIN-Code aus Ihrer Sendung ein, um das Auspack-Video aufzunehmen:",
+            btnAuth: "🔐 Kamera öffnen",
+            btnPdf: "📄 Prüfbericht als PDF drucken",
+            btnStartRec: "🔴 Auspacken aufnehmen",
+            btnStopRec: "⏹️ Stoppen & Hochladen"
+        },
+        en: {
+            status: "✅ Verified & Secured",
+            sellerTitle: "📦 Seller Packing Proof:",
+            buyerTitle: "🎁 Buyer Unboxing Proof:",
+            labelId: "Tracking ID:",
+            authTitle: "🔒 Buyer Authentication",
+            authDesc: "Enter the PIN code from your package to record unboxing video:",
+            btnAuth: "🔐 Open Camera",
+            btnPdf: "📄 Download PDF Report",
+            btnStartRec: "🔴 Start Unboxing Record",
+            btnStopRec: "⏹️ Stop & Upload"
+        },
+        ru: {
+            status: "✅ Подлинность подтверждена",
+            sellerTitle: "📦 Видео упаковки:",
+            buyerTitle: "🎁 Видео распаковки:",
+            labelId: "Трек-номер:",
+            authTitle: "🔒 Авторизация покупателя",
+            authDesc: "Введите ПИН-код из сообщения, чтобы записать видео распаковки:",
+            btnAuth: "🔐 Открыть камеру",
+            btnPdf: "📄 Сформировать отчёт PDF",
+            btnStartRec: "🔴 Начать запись распаковки",
+            btnStopRec: "⏹️ Остановить и выгрузить"
+        }
+    };
+
     const urlParams = new URLSearchParams(window.location.search);
     const trackingId = urlParams.get('id');
+    const langSelect = document.getElementById('langSelect');
 
     let stream = null;
     let mediaRecorder = null;
     let chunks = [];
     let isRecording = false;
+    let currentLang = 'de';
+
+    function setLanguage(lang) {
+        currentLang = lang;
+        const t = i18n[lang];
+        document.getElementById('t-status').textContent = t.status;
+        document.getElementById('t-seller-title').textContent = t.sellerTitle;
+        document.getElementById('t-buyer-title').textContent = t.buyerTitle;
+        document.getElementById('t-label-id').textContent = t.labelId;
+        document.getElementById('t-auth-title').textContent = t.authTitle;
+        document.getElementById('t-auth-desc').textContent = t.authDesc;
+        document.getElementById('t-btn-auth').textContent = t.btnAuth;
+        document.getElementById('t-btn-pdf').textContent = t.btnPdf;
+    }
+
+    function detectLanguage() {
+        const userLang = navigator.language || navigator.userLanguage;
+        if (userLang.startsWith('ru') || userLang.startsWith('uk')) return 'ru';
+        if (userLang.startsWith('en')) return 'en';
+        return 'de';
+    }
+
+    langSelect.addEventListener('change', (e) => setLanguage(e.target.value));
 
     async function loadVerification() {
+        currentLang = detectLanguage();
+        langSelect.value = currentLang;
+        setLanguage(currentLang);
+
         try {
             const res = await fetch(`/api/verify/${encodeURIComponent(trackingId)}`);
             if (!res.ok) throw new Error();
@@ -174,18 +285,20 @@
 
     function toggleUnboxingRec() {
         const btn = document.getElementById('recBtn');
+        const t = i18n[currentLang];
+
         if (!isRecording) {
             chunks = [];
             mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
             mediaRecorder.ondataavailable = e => chunks.push(e.data);
             mediaRecorder.start();
             isRecording = true;
-            btn.textContent = "⏹️ Остановить и выгрузить";
+            btn.textContent = t.btnStopRec;
             btn.className = "btn-success";
         } else {
             mediaRecorder.stop();
             isRecording = false;
-            btn.textContent = "Загрузка...";
+            btn.textContent = "...";
             btn.disabled = true;
 
             setTimeout(async () => {
@@ -197,13 +310,12 @@
 
                 const res = await fetch("/api/upload-unboxing", { method: "POST", body: formData });
                 if (res.ok) {
-                    alert("Unboxing-Video erfolgreich gespeichert!");
                     location.reload();
                 } else {
                     const err = await res.json();
-                    alert("Fehler: " + err.detail);
+                    alert("Error: " + err.detail);
                     btn.disabled = false;
-                    btn.textContent = "🔴 Начать запись распаковки";
+                    btn.textContent = t.btnStartRec;
                 }
             }, 1000);
         }
