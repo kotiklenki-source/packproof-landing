@@ -19,13 +19,19 @@ R2_SECRET_ACCESS_KEY = "a813faf3be2b34eb4fd90528bf91282c498ea1995854d9ac2e1eaa61
 R2_ENDPOINT_URL = "https://1ff6eaee49a620894ec41d70b1840a85.r2.cloudflarestorage.com"
 R2_BUCKET_NAME = "packproof-videos"
 
-# Конфигурация клиента S3 / Cloudflare R2
+# Настройка клиента под совместимость с Cloudflare R2
+s3_config = Config(
+    region_name='us-east-1',
+    signature_version='s3v4',
+    s3={'payload_signing_enabled': False}
+)
+
 s3_client = boto3.client(
     's3',
     endpoint_url=R2_ENDPOINT_URL,
     aws_access_key_id=R2_ACCESS_KEY_ID,
     aws_secret_access_key=R2_SECRET_ACCESS_KEY,
-    region_name='auto'
+    config=s3_config
 )
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -105,7 +111,7 @@ async def upload_video(
         file_ext = os.path.splitext(file.filename)[1] or ".webm"
         r2_key = f"{final_tracking_id}_{sha256_hash[:8]}{file_ext}"
 
-        # Загрузка без передачи лишних заголовков, ломающих подпись R2
+        # Отправляем видео в бакет
         s3_client.put_object(
             Bucket=R2_BUCKET_NAME,
             Key=r2_key,
