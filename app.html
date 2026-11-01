@@ -10,8 +10,8 @@
             --card-bg: #1e293b;
             --accent: #38bdf8;
             --accent-hover: #0284c7;
+            --ppi-green: #22c55e;
             --text-color: #f8fafc;
-            --success: #22c55e;
             --danger: #ef4444;
             --subtext: #94a3b8;
         }
@@ -46,10 +46,51 @@
             align-items: center;
         }
 
+        .header-logo-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Эмблема PPI */
+        .ppi-badge {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid var(--ppi-green);
+            color: var(--ppi-green);
+            font-weight: 900;
+            font-size: 0.75rem;
+            padding: 3px 7px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+        }
+
         .header h1 {
             margin: 0;
             font-size: 1.5rem;
+        }
+
+        .header h1 a {
             color: var(--accent);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-home {
+            background: #334155;
+            border: 1px solid #475569;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            font-weight: 600;
         }
 
         .lang-select {
@@ -116,15 +157,6 @@
             outline: none;
         }
 
-        input:focus, select:focus {
-            border-color: var(--accent);
-        }
-
-        .mode-hint {
-            font-size: 0.75rem;
-            color: var(--subtext);
-        }
-
         .video-wrapper {
             position: relative;
             width: 100%;
@@ -142,7 +174,6 @@
 
         canvas { display: none; }
 
-        /* Индикатор записи REC */
         .rec-overlay {
             position: absolute;
             top: 12px;
@@ -186,19 +217,13 @@
             font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
         }
 
         .btn-start { background: var(--accent); color: #000; }
-        .btn-start:hover { background: var(--accent-hover); }
-
         .btn-stop { background: var(--danger); color: #fff; }
-
-        .btn-upload { background: var(--success); color: #fff; }
+        .btn-upload { background: var(--ppi-green); color: #fff; }
         .btn-upload:disabled { opacity: 0.5; cursor: not-allowed; }
-
         .btn-secondary { background: #475569; color: #fff; margin-top: 6px; }
-        .btn-secondary:hover { background: #334155; }
 
         .status {
             font-size: 0.875rem;
@@ -219,12 +244,34 @@
             gap: 12px;
         }
 
-        .qr-section img {
+        .qr-box {
+            position: relative;
+            display: inline-block;
+            background: #fff;
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        .qr-box img {
             width: 180px;
             height: 180px;
-            border-radius: 8px;
-            background: #fff;
-            padding: 8px;
+            display: block;
+        }
+
+        /* Значок PPI поверх QR кода */
+        .qr-ppi-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #0f172a;
+            color: var(--ppi-green);
+            border: 2px solid var(--ppi-green);
+            font-weight: 900;
+            font-size: 0.7rem;
+            padding: 2px 5px;
+            border-radius: 4px;
+            box-shadow: 0 0 6px rgba(0,0,0,0.8);
         }
     </style>
 </head>
@@ -232,18 +279,23 @@
 
 <div class="container">
     <div class="header-top">
-        <div class="header">
-            <h1>PackProof</h1>
+        <div class="header-logo-group">
+            <span class="ppi-badge">PPI</span>
+            <div class="header">
+                <h1><a href="/" title="Zur Startseite">PackProof</a></h1>
+            </div>
         </div>
-        <select id="langSelect" class="lang-select">
-            <option value="de">🇩🇪 DE</option>
-            <option value="en">🇬🇧 EN</option>
-            <option value="ru">🇺🇦 RU</option>
-        </select>
+        <div class="header-actions">
+            <a href="/" id="btnHome" class="btn-home">🏠 Startseite</a>
+            <select id="langSelect" class="lang-select">
+                <option value="de">🇩🇪 DE</option>
+                <option value="en">🇬🇧 EN</option>
+                <option value="ru">🇺🇦 RU</option>
+            </select>
+        </div>
     </div>
     <p class="subtitle" id="t-subtitle">Visuelle Verpackungssicherung & Qualitätsnachweis</p>
 
-    <!-- Инструкция -->
     <details class="instruction-box">
         <summary id="t-guide-title">ℹ️ Kurzanleitung</summary>
         <div class="instruction-content">
@@ -288,7 +340,10 @@
 
     <div id="qrSection" class="qr-section">
         <h3 id="t-qr-title">Bestätigungs-QR-Code:</h3>
-        <img id="qrImage" src="" alt="QR Code">
+        <div class="qr-box">
+            <img id="qrImage" src="" alt="QR Code">
+            <div class="qr-ppi-center">PPI</div>
+        </div>
         <button id="downloadQrBtn" class="btn-secondary" style="width:100%;">📥 QR-Code herunterladen</button>
         <button onclick="resetForm()" id="t-next-btn" class="btn-start" style="width:100%; margin-top:4px;">Nächstes Video aufnehmen</button>
     </div>
@@ -297,6 +352,7 @@
 <script>
     const i18n = {
         de: {
+            btnHome: "🏠 Startseite",
             subtitle: "Visuelle Verpackungssicherung & Qualitätsnachweis",
             guideTitle: "ℹ️ Kurzanleitung",
             guideSteps: `
@@ -323,6 +379,7 @@
             msgSuccess: "Erfolgreich hochgeladen!"
         },
         en: {
+            btnHome: "🏠 Home",
             subtitle: "Visual Packing Verification & Proof System",
             guideTitle: "ℹ️ User Guide",
             guideSteps: `
@@ -349,6 +406,7 @@
             msgSuccess: "Uploaded successfully!"
         },
         ru: {
+            btnHome: "🏠 Главная",
             subtitle: "Визуальная фиксация упаковки и контроль качества",
             guideTitle: "ℹ️ Инструкция",
             guideSteps: `
@@ -391,6 +449,7 @@
     const langSelect = document.getElementById('langSelect');
     const recOverlay = document.getElementById('recOverlay');
     const recText = document.getElementById('recText');
+    const btnHome = document.getElementById('btnHome');
 
     let stream = null;
     let mediaRecorder = null;
@@ -404,6 +463,7 @@
     function setLanguage(lang) {
         currentLang = lang;
         const t = i18n[lang];
+        btnHome.textContent = t.btnHome;
         document.getElementById('t-subtitle').textContent = t.subtitle;
         document.getElementById('t-guide-title').textContent = t.guideTitle;
         document.getElementById('t-guide-steps').innerHTML = t.guideSteps;
@@ -483,7 +543,6 @@
         mediaRecorder.start();
         isRecording = true;
 
-        // Включаем таймер и плашку REC
         recOverlay.style.display = 'flex';
         updateTimerDisplay();
         timerInterval = setInterval(() => {
@@ -552,7 +611,6 @@
         }
     });
 
-    // Функция скачивания QR-кода
     downloadQrBtn.addEventListener('click', async () => {
         if (!qrImage.src) return;
         try {
