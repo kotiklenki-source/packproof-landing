@@ -4,7 +4,6 @@ import json
 import hashlib
 import qrcode
 import boto3
-import urllib.request
 from io import BytesIO
 from botocore.config import Config
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
@@ -20,14 +19,19 @@ R2_SECRET_ACCESS_KEY = "a9642c38ce9615ea5e9ada512954d9ac1b89075c974f3d2b467bdab8
 R2_ENDPOINT_URL = "https://1ff6eaee49a620894ec41d70b1840a85.r2.cloudflarestorage.com"
 R2_BUCKET_NAME = "packproof-videos"
 
-# Настройка клиента boto3
+# Клиент S3 для Cloudflare R2
+s3_config = Config(
+    region_name='us-east-1',
+    signature_version='s3v4',
+    s3={'payload_signing_enabled': False}
+)
+
 s3_client = boto3.client(
     's3',
     endpoint_url=R2_ENDPOINT_URL,
     aws_access_key_id=R2_ACCESS_KEY_ID,
     aws_secret_access_key=R2_SECRET_ACCESS_KEY,
-    region_name='auto',
-    config=Config(signature_version='s3v4')
+    config=s3_config
 )
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -107,30 +111,14 @@ async def upload_video(
         file_ext = os.path.splitext(file.filename)[1] or ".webm"
         r2_key = f"{final_tracking_id}_{sha256_hash[:8]}{file_ext}"
 
-        # 1. Генерируем преподписанный URL для загрузки PutObject
-        upload_url = s3_client.generate_presigned_url(
-            'put_object',
-            Params={
-                'Bucket': R2_BUCKET_NAME,
-                'Key': r2_key,
-                'ContentType': file.content_type or 'video/webm'
-            },
-            ExpiresIn=600
+        # Загрузка видеозаписи в R2
+        s3_client.put_object(
+            Bucket=R2_BUCKET_NAME,
+            Key=r2_key,
+            Body=contents,
+            ContentType='video/webm'
         )
 
-        # 2. Выполняем загрузку через встроенный urllib без внешних зависимостей
-        req = urllib.request.Request(
-            upload_url,
-            data=contents,
-            headers={'Content-Type': file.content_type or 'video/webm'},
-            method='PUT'
-        )
-        
-        with urllib.request.urlopen(req) as response:
-            if response.status not in (200, 201):
-                raise Exception(f"R2 Upload HTTP Error {response.status}")
-
-        # 3. Сохраняем записи в БД
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
         cursor.execute(
