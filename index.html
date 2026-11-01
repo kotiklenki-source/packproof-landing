@@ -1,271 +1,253 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PackProof Inspection | Video-Dokumentation für e-Commerce</title>
-  <!-- PackProof Favicon & Web Manifest -->
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="manifest" href="/site.webmanifest">
-  <style>
-    :root {
-      --bg-start: #0b132b;
-      --bg-end: #064e3b;
-      --card-bg: rgba(28, 37, 65, 0.9);
-      --text: #ffffff;
-      --muted: #94a3b8;
-      --accent-green: #10b981;
-      --accent-blue: #3a86ff;
-      --accent-blue-hover: #2563eb;
-      --border: rgba(58, 134, 255, 0.25);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PackProof Inspection — Visuelle Verpackungssicherung</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #38bdf8;
+            --accent-hover: #0284c7;
+            --ppi-green: #22c55e;
+            --text-color: #f8fafc;
+            --subtext: #94a3b8;
+        }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
-      color: var(--text);
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
-    nav {
-      max-width: 1100px;
-      margin: 0 auto;
-      width: 100%;
-      padding: 25px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-sizing: border-box;
-    }
+        .navbar {
+            background: var(--card-bg);
+            border-bottom: 1px solid #334155;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-    .logo {
-      font-size: 1.5rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+        .logo-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    .logo-badge {
-      background: rgba(16, 185, 129, 0.2);
-      color: var(--accent-green);
-      font-size: 0.75rem;
-      padding: 3px 8px;
-      border-radius: 12px;
-      border: 1px solid rgba(16, 185, 129, 0.4);
-    }
+        .ppi-badge {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid var(--ppi-green);
+            color: var(--ppi-green);
+            font-weight: 900;
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+        }
 
-    .nav-links {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-    }
+        .logo-text {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin: 0;
+        }
 
-    .nav-link {
-      color: var(--muted);
-      text-decoration: none;
-      font-weight: 500;
-    }
+        .logo-text a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
 
-    .btn-nav {
-      background: var(--accent-blue);
-      color: #fff;
-      padding: 10px 20px;
-      border-radius: 10px;
-      text-decoration: none;
-      font-weight: 600;
-      box-shadow: 0 4px 14px rgba(58, 134, 255, 0.3);
-    }
+        .logo-text a:hover {
+            color: var(--accent-hover);
+        }
 
-    .hero {
-      max-width: 1100px;
-      margin: 40px auto 60px auto;
-      padding: 0 20px;
-      text-align: center;
-      box-sizing: border-box;
-    }
+        .nav-right {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
 
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(58, 134, 255, 0.15);
-      color: var(--accent-blue);
-      border: 1px solid rgba(58, 134, 255, 0.3);
-      padding: 8px 18px;
-      border-radius: 30px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      margin-bottom: 25px;
-    }
+        .btn-app {
+            background: var(--ppi-green);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: opacity 0.2s;
+        }
 
-    h1 {
-      font-size: 3rem;
-      font-weight: 800;
-      line-height: 1.2;
-      margin: 0 0 20px 0;
-      color: #ffffff;
-    }
+        .btn-app:hover { opacity: 0.9; }
 
-    h1 span {
-      color: var(--accent-blue);
-    }
+        .lang-select {
+            background: #334155;
+            border: 1px solid #475569;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
 
-    p.hero-sub {
-      font-size: 1.2rem;
-      color: var(--muted);
-      max-width: 700px;
-      margin: 0 auto 35px auto;
-      line-height: 1.6;
-    }
+        .hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
 
-    .cta-group {
-      display: flex;
-      gap: 15px;
-      justify-content: center;
-      align-items: center;
-    }
+        /* Крупная иконка щита с галочкой */
+        .shield-icon-container {
+            width: 80px;
+            height: 80px;
+            background: rgba(56, 189, 248, 0.1);
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+        }
 
-    .btn-hero-primary {
-      background: var(--accent-blue);
-      color: #fff;
-      padding: 16px 32px;
-      border-radius: 12px;
-      font-size: 1.1rem;
-      font-weight: 700;
-      text-decoration: none;
-      box-shadow: 0 10px 25px rgba(58, 134, 255, 0.4);
-    }
+        .shield-icon {
+            font-size: 2.5rem;
+        }
 
-    .features {
-      max-width: 1100px;
-      margin: 0 auto 80px auto;
-      padding: 0 20px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 25px;
-      box-sizing: border-box;
-    }
+        .hero h1 {
+            font-size: 2.3rem;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
 
-    .feature-card {
-      background: var(--card-bg);
-      border-radius: 18px;
-      padding: 30px;
-      border: 1px solid var(--border);
-      box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.4);
-    }
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--subtext);
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
 
-    .feature-icon {
-      width: 50px;
-      height: 50px;
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--accent-green);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      margin-bottom: 20px;
-    }
+        footer {
+            background: var(--card-bg);
+            border-top: 1px solid #334155;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--subtext);
+        }
 
-    .feature-card h3 {
-      margin: 0 0 10px 0;
-      font-size: 1.25rem;
-      color: #fff;
-    }
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+            margin: 0 10px;
+        }
 
-    .feature-card p {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.5;
-      font-size: 0.95rem;
-    }
-
-    footer {
-      margin-top: auto;
-      border-top: 1px solid var(--border);
-      padding: 30px 20px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.9rem;
-      background: rgba(11, 19, 43, 0.8);
-    }
-
-    footer a {
-      color: var(--muted);
-      text-decoration: none;
-      margin: 0 10px;
-    }
-  </style>
-  <!-- PackProof Favicon & Web Manifest -->
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="manifest" href="/site.webmanifest">
+        footer a:hover { text-decoration: underline; }
+    </style>
 </head>
 <body>
 
-  <nav>
-    <div class="logo">
-      PackProof <span class="logo-badge">B2B SaaS</span>
-    </div>
-    <div class="nav-links">
-      <a href="app.html" class="nav-link">Recorder App</a>
-      <a href="app.html" class="btn-nav">App Starten →</a>
-    </div>
-  </nav>
+    <nav class="navbar">
+        <div class="logo-group">
+            <span class="ppi-badge">PPI</span>
+            <h1 class="logo-text">
+                <a href="/" title="PackProof Inspection">PackProof Inspection</a>
+            </h1>
+        </div>
+        <div class="nav-right">
+            <select id="langSelect" class="lang-select">
+                <option value="de">DE</option>
+                <option value="en">EN</option>
+                <option value="ru">RU</option>
+            </select>
+            <a href="/app" class="btn-app" id="t-btn-app">🚀 App starten</a>
+        </div>
+    </nav>
 
-  <section class="hero">
-    <div class="hero-badge">
-      🛡️ Lückenlose Beweissicherung für Händler
-    </div>
-    <h1>Schutz vor Retouren-Betrug durch <span>SHA-256 Video-Nachweis</span></h1>
-    <p class="hero-sub">
-      Dokumentieren Sie den Verpackungsprozess Ihrer Pakete in Echtzeit. Erstellen Sie fälschungssichere QR-Code-Etiketten für eBay, Amazon & Onlineshops.
-    </p>
-    <div class="cta-group">
-      <a href="app.html" class="btn-hero-primary">Jetzt Paket verpacken & sichern</a>
-    </div>
-  </section>
+    <main class="hero">
+        <!-- Фирменная иконка щита с галочкой -->
+        <div class="shield-icon-container">
+            <span class="shield-icon">🛡️</span>
+        </div>
 
-  <section class="features">
-    <div class="feature-card">
-      <div class="feature-icon">📹</div>
-      <h3>Schnelle Video-Aufnahme</h3>
-      <p>Direkt im Browser ohne Installation. Unterstützt jede Standard-Webcam oder Dokumentenkamera am Packtisch.</p>
-    </div>
+        <h1 id="t-hero-title">Visuelle Verpackungssicherung</h1>
+        <p id="t-hero-desc">
+            PackProof Inspection ist die professionelle Komplettlösung für E-Commerce und Logistik. 
+            Sichern Sie Ihre Sendungen mit unmanipulierbaren Video-Nachweisen und schützen Sie sich vor unberechtigten Reklamationen.
+        </p>
+        <a href="/app" class="btn-app" id="t-hero-btn" style="padding: 14px 28px; font-size: 1.1rem;">
+            Jetzt Inspektion starten
+        </a>
+    </main>
 
-    <div class="feature-card">
-      <div class="feature-icon">🔐</div>
-      <h3>SHA-256 Fingerabdruck</h3>
-      <p>Jedes Video erhält einen mathematisch unveränderbaren Hash-Wert zur absoluten Beweiskraft bei Retouren-Konflikten.</p>
-    </div>
+    <footer>
+        <div>
+            © PackProof Inspection System. Alle Rechte vorbehalten.
+        </div>
+        <div style="margin-top: 8px;">
+            <a href="/impressum.html">Impressum</a> | 
+            <a href="/datenschutz.html">Datenschutzerklärung</a>
+        </div>
+    </footer>
 
-    <div class="feature-card">
-      <div class="feature-icon">🏷️</div>
-      <h3>QR-Code Etiketten</h3>
-      <p>Automatischer Druck von Verifikations-Labeln. Käufer und Plattform-Support können den Verpackungsstatus sofort scannen.</p>
-    </div>
-  </section>
+<script>
+    const i18n = {
+        de: {
+            btnApp: "🚀 App starten",
+            heroTitle: "Visuelle Verpackungssicherung & Qualitätsnachweis",
+            heroDesc: "PackProof Inspection ist die professionelle Komplettlösung für E-Commerce und Logistik. Sichern Sie Ihre Sendungen mit unmanipulierbaren Video-Nachweisen und schützen Sie sich vor unberechtigten Reklamationen.",
+            heroBtn: "Jetzt Inspektion starten"
+        },
+        en: {
+            btnApp: "🚀 Launch App",
+            heroTitle: "Visual Packing Verification & Proof System",
+            heroDesc: "PackProof Inspection is the professional all-in-one solution for e-commerce and logistics. Secure your shipments with tamper-proof video evidence and protect your business against unjustified claim disputes.",
+            heroBtn: "Start Inspection Now"
+        },
+        ru: {
+            btnApp: "🚀 Открыть приложение",
+            heroTitle: "Визуальная фиксация упаковки и контроль качества",
+            heroDesc: "PackProof Inspection — профессиональное решение для e-commerce и логистики. Защитите отправки видеодоказательствами и исключите неквалифицированные споры и необоснованные возвраты.",
+            heroBtn: "Начать видеоинспекцию"
+        }
+    };
 
-  <footer>
-    <p>&copy; 2026 PackProof Inspection Systems. Alle Rechte vorbehalten.</p>
-    <p>
-      <a href="impressum.html">Impressum</a> | 
-      <a href="datenschutz.html">Datenschutz</a>
-    </p>
-  </footer>
+    const langSelect = document.getElementById('langSelect');
+
+    function setLanguage(lang) {
+        const t = i18n[lang];
+        document.getElementById('t-btn-app').textContent = t.btnApp;
+        document.getElementById('t-hero-title').textContent = t.heroTitle;
+        document.getElementById('t-hero-desc').textContent = t.heroDesc;
+        document.getElementById('t-hero-btn').textContent = t.heroBtn;
+    }
+
+    function detectLanguage() {
+        const userLang = navigator.language || navigator.userLanguage;
+        if (userLang.startsWith('ru') || userLang.startsWith('uk')) return 'ru';
+        if (userLang.startsWith('en')) return 'en';
+        return 'de';
+    }
+
+    langSelect.addEventListener('change', (e) => setLanguage(e.target.value));
+
+    const initialLang = detectLanguage();
+    langSelect.value = initialLang;
+    setLanguage(initialLang);
+</script>
 
 </body>
 </html>
