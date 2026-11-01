@@ -13,25 +13,23 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="PackProof Inspection API")
 
-# --- СВЕЖИЕ НАСТРОЙКИ CLOUDFLARE R2 ---
+# --- НАСТРОЙКИ CLOUDFLARE R2 ---
 R2_ACCESS_KEY_ID = "ca51169d343391ccdec16b1ba9b6c021"
 R2_SECRET_ACCESS_KEY = "a9642c38ce9615ea5e9ada512954d9ac1b89075c974f3d2b467bdab8a32cef36"
 R2_ENDPOINT_URL = "https://1ff6eaee49a620894ec41d70b1840a85.r2.cloudflarestorage.com"
 R2_BUCKET_NAME = "packproof-videos"
 
-# Клиент S3 для Cloudflare R2
-s3_config = Config(
-    region_name='us-east-1',
-    signature_version='s3v4',
-    s3={'payload_signing_enabled': False}
-)
-
+# Конфигурация S3 клиента без принудительной подписи payload
 s3_client = boto3.client(
     's3',
     endpoint_url=R2_ENDPOINT_URL,
     aws_access_key_id=R2_ACCESS_KEY_ID,
     aws_secret_access_key=R2_SECRET_ACCESS_KEY,
-    config=s3_config
+    region_name='auto',
+    config=Config(
+        signature_version='s3v4',
+        s3={'addressing_style': 'path'}
+    )
 )
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -111,12 +109,13 @@ async def upload_video(
         file_ext = os.path.splitext(file.filename)[1] or ".webm"
         r2_key = f"{final_tracking_id}_{sha256_hash[:8]}{file_ext}"
 
-        # Загрузка видеозаписи в R2
-        s3_client.put_object(
-            Bucket=R2_BUCKET_NAME,
-            Key=r2_key,
-            Body=contents,
-            ContentType='video/webm'
+        # Загрузка через upload_fileobj с явной передачей ExtraArgs
+        file_obj = BytesIO(contents)
+        s3_client.upload_fileobj(
+            file_obj,
+            R2_BUCKET_NAME,
+            r2_key,
+            ExtraArgs={'ContentType': file.content_type or 'video/webm'}
         )
 
         conn = sqlite3.connect(DB_PATH)
