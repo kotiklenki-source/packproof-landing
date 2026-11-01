@@ -9,7 +9,6 @@
             --bg-color: #0f172a;
             --card-bg: #1e293b;
             --accent: #38bdf8;
-            --accent-hover: #0284c7;
             --ppi-green: #22c55e;
             --text-color: #f8fafc;
             --danger: #ef4444;
@@ -52,7 +51,6 @@
             gap: 8px;
         }
 
-        /* Эмблема PPI */
         .ppi-badge {
             background: rgba(34, 197, 94, 0.15);
             border: 1px solid var(--ppi-green);
@@ -61,26 +59,10 @@
             font-size: 0.75rem;
             padding: 3px 7px;
             border-radius: 6px;
-            letter-spacing: 0.5px;
-            box-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
         }
 
-        .header h1 {
-            margin: 0;
-            font-size: 1.5rem;
-        }
-
-        .header h1 a {
-            color: var(--accent);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .header h1 { margin: 0; font-size: 1.5rem; }
+        .header h1 a { color: var(--accent); text-decoration: none; }
 
         .btn-home {
             background: #334155;
@@ -103,11 +85,7 @@
             cursor: pointer;
         }
 
-        .subtitle {
-            margin: -8px 0 0 0;
-            font-size: 0.85rem;
-            color: var(--subtext);
-        }
+        .subtitle { margin: -8px 0 0 0; font-size: 0.85rem; color: var(--subtext); }
 
         details.instruction-box {
             background: #0f172a;
@@ -117,162 +95,59 @@
             font-size: 0.875rem;
         }
 
-        summary {
-            cursor: pointer;
-            font-weight: 600;
-            color: var(--accent);
-            outline: none;
-        }
+        summary { cursor: pointer; font-weight: 600; color: var(--accent); outline: none; }
+        .instruction-content { margin-top: 10px; color: #cbd5e1; line-height: 1.4; }
+        .instruction-content ol { margin: 6px 0 0 18px; padding: 0; }
 
-        .instruction-content {
-            margin-top: 10px;
-            color: #cbd5e1;
-            line-height: 1.4;
-        }
+        .input-group { display: flex; flex-direction: column; gap: 6px; }
+        label { font-size: 0.85rem; font-weight: 600; color: #cbd5e1; }
+        input, select { background: #334155; border: 1px solid #475569; color: #fff; padding: 12px; border-radius: 8px; font-size: 0.95rem; outline: none; }
 
-        .instruction-content ol {
-            margin: 6px 0 0 18px;
-            padding: 0;
-        }
+        .mode-hint { font-size: 0.75rem; color: var(--subtext); }
 
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #cbd5e1;
-        }
-
-        input, select {
-            background: #334155;
-            border: 1px solid #475569;
-            color: #fff;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            outline: none;
-        }
-
-        .video-wrapper {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 4/3;
-            background: #000;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        video, canvas {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
+        .video-wrapper { position: relative; width: 100%; aspect-ratio: 4/3; background: #000; border-radius: 12px; overflow: hidden; }
+        video, canvas { width: 100%; height: 100%; object-fit: cover; }
         canvas { display: none; }
 
         .rec-overlay {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            background: rgba(0, 0, 0, 0.7);
-            color: #fff;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            display: none;
-            align-items: center;
-            gap: 8px;
-            z-index: 10;
+            position: absolute; top: 12px; left: 12px; background: rgba(0, 0, 0, 0.7); color: #fff;
+            padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700;
+            display: none; align-items: center; gap: 8px; z-index: 10;
         }
 
-        .rec-dot {
-            width: 10px;
-            height: 10px;
-            background-color: var(--danger);
-            border-radius: 50%;
-            animation: blink 1s infinite;
-        }
+        .rec-dot { width: 10px; height: 10px; background-color: var(--danger); border-radius: 50%; animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
 
-        @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0.2; }
-            100% { opacity: 1; }
-        }
-
-        .controls {
-            display: flex;
-            gap: 10px;
-        }
-
-        button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
+        .controls { display: flex; gap: 10px; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
         .btn-start { background: var(--accent); color: #000; }
         .btn-stop { background: var(--danger); color: #fff; }
         .btn-upload { background: var(--ppi-green); color: #fff; }
         .btn-upload:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-secondary { background: #475569; color: #fff; margin-top: 6px; }
+        .btn-secondary { background: #334155; color: #fff; border: 1px solid #475569; }
+        .btn-client { background: #0284c7; color: #fff; }
 
-        .status {
-            font-size: 0.875rem;
-            text-align: center;
-            padding: 8px;
-            border-radius: 6px;
-            display: none;
-        }
-
+        .status { font-size: 0.875rem; text-align: center; padding: 8px; border-radius: 6px; display: none; }
         .status.error { background: rgba(239, 68, 68, 0.2); color: #f87171; display: block; }
         .status.success { background: rgba(34, 197, 94, 0.2); color: #4ade80; display: block; }
 
-        .qr-section {
-            text-align: center;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-        }
+        .qr-section { text-align: center; display: none; flex-direction: column; align-items: center; gap: 12px; }
+        .qr-box { position: relative; background: #fff; padding: 10px; border-radius: 12px; display: inline-block; }
+        .qr-box img { width: 180px; height: 180px; display: block; }
 
-        .qr-box {
-            position: relative;
-            display: inline-block;
-            background: #fff;
-            padding: 10px;
-            border-radius: 12px;
-        }
-
-        .qr-box img {
-            width: 180px;
-            height: 180px;
-            display: block;
-        }
-
-        /* Значок PPI поверх QR кода */
         .qr-ppi-center {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #0f172a;
-            color: var(--ppi-green);
-            border: 2px solid var(--ppi-green);
-            font-weight: 900;
-            font-size: 0.7rem;
-            padding: 2px 5px;
-            border-radius: 4px;
-            box-shadow: 0 0 6px rgba(0,0,0,0.8);
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #0f172a; color: var(--ppi-green); border: 2px solid var(--ppi-green);
+            font-weight: 900; font-size: 0.7rem; padding: 2px 5px; border-radius: 4px;
         }
+
+        .pin-card {
+            background: #0f172a; border: 1px solid var(--ppi-green); padding: 12px;
+            border-radius: 8px; width: 100%; box-sizing: border-box; text-align: center;
+        }
+
+        .pin-code { font-size: 1.5rem; font-weight: 900; letter-spacing: 2px; color: var(--ppi-green); margin: 4px 0; }
+        .export-group { display: flex; flex-direction: column; gap: 8px; width: 100%; }
     </style>
 </head>
 <body>
@@ -281,11 +156,9 @@
     <div class="header-top">
         <div class="header-logo-group">
             <span class="ppi-badge">PPI</span>
-            <div class="header">
-                <h1><a href="/" title="Zur Startseite">PackProof</a></h1>
-            </div>
+            <div class="header"><h1><a href="/">PackProof</a></h1></div>
         </div>
-        <div class="header-actions">
+        <div style="display:flex; gap:8px;">
             <a href="/" id="btnHome" class="btn-home">🏠 Startseite</a>
             <select id="langSelect" class="lang-select">
                 <option value="de">🇩🇪 DE</option>
@@ -339,13 +212,25 @@
     <div id="statusMsg" class="status"></div>
 
     <div id="qrSection" class="qr-section">
-        <h3 id="t-qr-title">Bestätigungs-QR-Code:</h3>
+        <h3 id="t-qr-title">Bestätigungs-QR-Code & PIN:</h3>
+        
         <div class="qr-box">
             <img id="qrImage" src="" alt="QR Code">
             <div class="qr-ppi-center">PPI</div>
         </div>
-        <button id="downloadQrBtn" class="btn-secondary" style="width:100%;">📥 QR-Code herunterladen</button>
-        <button onclick="resetForm()" id="t-next-btn" class="btn-start" style="width:100%; margin-top:4px;">Nächstes Video aufnehmen</button>
+
+        <div class="pin-card">
+            <div style="font-size:0.8rem; color:var(--subtext);" id="t-pin-title">Sicherheits-PIN für Käufer (Unboxing):</div>
+            <div id="generatedPin" class="pin-code">--------</div>
+            <div style="font-size:0.75rem; color:var(--subtext);" id="t-pin-desc">Diesen PIN per Nachricht an den Käufer senden!</div>
+        </div>
+
+        <div class="export-group">
+            <button id="downloadQrBtn" class="btn-secondary">🏷️ QR-Etikett herunterladen (Druck auf Verpackung)</button>
+            <button id="downloadCardBtn" class="btn-client">✉️ Kundenkarte herunterladen (Bild für eBay/WhatsApp)</button>
+        </div>
+
+        <button onclick="resetForm()" id="t-next-btn" class="btn-start" style="width:100%; margin-top:6px;">Nächstes Video aufnehmen</button>
     </div>
 </div>
 
@@ -370,8 +255,11 @@
             btnStart: "Aufnahme starten",
             btnStop: "Aufnahme stoppen",
             btnUpload: "Hochladen & Verifizieren",
-            qrTitle: "Bestätigungs-QR-Code:",
-            btnDownloadQr: "📥 QR-Code herunterladen",
+            qrTitle: "Bestätigungs-QR-Code & PIN:",
+            pinTitle: "Sicherheits-PIN für Käufer (Unboxing):",
+            pinDesc: "Diesen PIN per Nachricht an den Käufer senden!",
+            btnDownloadQr: "🏷️ QR-Etikett herunterladen (Druck auf Verpackung)",
+            btnDownloadCard: "✉️ Kundenkarte herunterladen (Bild für eBay/WhatsApp)",
             btnNext: "Nächstes Video aufnehmen",
             msgRecording: "Aufnahme läuft...",
             msgReady: "Aufnahme bereit zum Hochladen.",
@@ -397,8 +285,11 @@
             btnStart: "Start Recording",
             btnStop: "Stop Recording",
             btnUpload: "Upload & Verify",
-            qrTitle: "Verification QR Code:",
-            btnDownloadQr: "📥 Download QR Code",
+            qrTitle: "Verification QR Code & PIN:",
+            pinTitle: "Security PIN for Buyer (Unboxing):",
+            pinDesc: "Send this PIN to the buyer via message!",
+            btnDownloadQr: "🏷️ Download Package Label (For Box Print)",
+            btnDownloadCard: "✉️ Download Buyer Card (Image for eBay/WhatsApp)",
             btnNext: "Record Next Video",
             msgRecording: "Recording in progress...",
             msgReady: "Recording ready for upload.",
@@ -424,8 +315,11 @@
             btnStart: "Начать запись",
             btnStop: "Остановить запись",
             btnUpload: "Загрузить и проверить",
-            qrTitle: "Подтверждающий QR-код:",
-            btnDownloadQr: "📥 Скачать QR-код",
+            qrTitle: "QR-код и PIN для покупателя:",
+            pinTitle: "ПИН-код безопасности покупателя (Распаковка):",
+            pinDesc: "Отправьте этот ПИН-код покупателю в сообщении!",
+            btnDownloadQr: "🏷️ Скачать этикетку (Друк на упаковку)",
+            btnDownloadCard: "✉️ Скачать открытку клиенту (Картинка для eBay/WhatsApp)",
             btnNext: "Записать следующее видео",
             msgRecording: "Идет запись...",
             msgReady: "Запись готова к загрузке.",
@@ -442,7 +336,9 @@
     const statusMsg = document.getElementById('statusMsg');
     const qrSection = document.getElementById('qrSection');
     const qrImage = document.getElementById('qrImage');
+    const generatedPin = document.getElementById('generatedPin');
     const downloadQrBtn = document.getElementById('downloadQrBtn');
+    const downloadCardBtn = document.getElementById('downloadCardBtn');
     const trackingInput = document.getElementById('trackingId');
     const modeSelect = document.getElementById('modeSelect');
     const modeHint = document.getElementById('modeHint');
@@ -451,14 +347,7 @@
     const recText = document.getElementById('recText');
     const btnHome = document.getElementById('btnHome');
 
-    let stream = null;
-    let mediaRecorder = null;
-    let recordedChunks = [];
-    let isRecording = false;
-    let lapseInterval = null;
-    let timerInterval = null;
-    let secondsRecorded = 0;
-    let currentLang = 'de';
+    let stream = null, mediaRecorder = null, recordedChunks = [], isRecording = false, lapseInterval = null, timerInterval = null, secondsRecorded = 0, currentLang = 'de';
 
     function setLanguage(lang) {
         currentLang = lang;
@@ -472,14 +361,13 @@
         document.getElementById('t-opt-timelapse').textContent = t.optTimelapse;
         document.getElementById('t-opt-standard').textContent = t.optStandard;
         document.getElementById('t-qr-title').textContent = t.qrTitle;
+        document.getElementById('t-pin-title').textContent = t.pinTitle;
+        document.getElementById('t-pin-desc').textContent = t.pinDesc;
         downloadQrBtn.textContent = t.btnDownloadQr;
+        downloadCardBtn.textContent = t.btnDownloadCard;
         document.getElementById('t-next-btn').textContent = t.btnNext;
         
-        if (!isRecording) {
-            recordBtn.textContent = t.btnStart;
-        } else {
-            recordBtn.textContent = t.btnStop;
-        }
+        recordBtn.textContent = isRecording ? t.btnStop : t.btnStart;
         uploadBtn.textContent = t.btnUpload;
         updateModeHint();
     }
@@ -489,7 +377,7 @@
         modeHint.textContent = modeSelect.value === 'timelapse' ? t.hintTimelapse : t.hintStandard;
     }
 
-    langSelect.addEventListener('change', (e) => setLanguage(e.target.value));
+    langSelect.addEventListener('change', e => setLanguage(e.target.value));
     modeSelect.addEventListener('change', updateModeHint);
 
     async function initCamera() {
@@ -497,58 +385,41 @@
             stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
             preview.srcObject = stream;
         } catch (err) {
-            showStatus("Kamera-Zugriff fehlgeschlagen: " + err.message, true);
+            showStatus("Kamera-Zugriff error: " + err.message, true);
         }
+    }
+
+    function generate8DigitPin() {
+        return Math.floor(10000000 + Math.random() * 90000000).toString();
     }
 
     initCamera();
     setLanguage('de');
 
     recordBtn.addEventListener('click', () => {
-        if (!isRecording) {
-            startRecording();
-        } else {
-            stopRecording();
-        }
+        if (!isRecording) startRecording(); else stopRecording();
     });
 
     function startRecording() {
         recordedChunks = [];
-        const mode = modeSelect.value;
         secondsRecorded = 0;
-
-        if (mode === 'timelapse') {
-            const videoTrack = stream.getVideoTracks()[0];
-            const settings = videoTrack.getSettings();
-
+        if (modeSelect.value === 'timelapse') {
+            const settings = stream.getVideoTracks()[0].getSettings();
             recordCanvas.width = settings.width || 640;
             recordCanvas.height = settings.height || 480;
-
             ctx.drawImage(preview, 0, 0, recordCanvas.width, recordCanvas.height);
-
-            lapseInterval = setInterval(() => {
-                ctx.drawImage(preview, 0, 0, recordCanvas.width, recordCanvas.height);
-            }, 500);
-
-            const canvasStream = recordCanvas.captureStream(30);
-            mediaRecorder = new MediaRecorder(canvasStream, { mimeType: 'video/webm' });
+            lapseInterval = setInterval(() => ctx.drawImage(preview, 0, 0, recordCanvas.width, recordCanvas.height), 500);
+            mediaRecorder = new MediaRecorder(recordCanvas.captureStream(30), { mimeType: 'video/webm' });
         } else {
             mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
         }
-
-        mediaRecorder.ondataavailable = (e) => {
-            if (e.data.size > 0) recordedChunks.push(e.data);
-        };
-
+        mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
         mediaRecorder.start();
         isRecording = true;
 
         recOverlay.style.display = 'flex';
         updateTimerDisplay();
-        timerInterval = setInterval(() => {
-            secondsRecorded++;
-            updateTimerDisplay();
-        }, 1000);
+        timerInterval = setInterval(() => { secondsRecorded++; updateTimerDisplay(); }, 1000);
 
         recordBtn.textContent = i18n[currentLang].btnStop;
         recordBtn.className = "btn-stop";
@@ -565,7 +436,6 @@
     function stopRecording() {
         if (lapseInterval) { clearInterval(lapseInterval); lapseInterval = null; }
         if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-        
         recOverlay.style.display = 'none';
         mediaRecorder.stop();
         isRecording = false;
@@ -576,57 +446,123 @@
         showStatus(i18n[currentLang].msgReady, false);
     }
 
+    let currentPin = "";
     let lastTrackingId = "";
 
     uploadBtn.addEventListener('click', async () => {
         lastTrackingId = trackingInput.value.trim() || "ID_" + Date.now();
-        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        currentPin = generate8DigitPin();
 
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
         const formData = new FormData();
         formData.append("file", blob, `${lastTrackingId}.webm`);
         formData.append("tracking_id", lastTrackingId);
+        formData.append("secret_pin", currentPin);
 
         uploadBtn.disabled = true;
         showStatus(i18n[currentLang].msgUploading, false);
 
         try {
-            const res = await fetch("/api/upload", {
-                method: "POST",
-                body: formData
-            });
-
-            if (!res.ok) {
-                const errData = await res.json();
-                throw new Error(errData.detail || "Upload fehlgeschlagen");
-            }
-
+            const res = await fetch("/api/upload", { method: "POST", body: formData });
+            if (!res.ok) throw new Error();
             const data = await res.json();
-            const qrUrl = `/api/qr/${encodeURIComponent(data.tracking_id)}`;
-            qrImage.src = qrUrl;
+
+            qrImage.src = `/api/qr/${encodeURIComponent(data.tracking_id)}`;
+            generatedPin.textContent = currentPin;
             qrSection.style.display = 'flex';
             showStatus(i18n[currentLang].msgSuccess, false);
         } catch (err) {
-            showStatus(err.message, true);
+            showStatus("Upload Error", true);
             uploadBtn.disabled = false;
         }
     });
 
+    // 1. Скачать наклейку на коробку
     downloadQrBtn.addEventListener('click', async () => {
         if (!qrImage.src) return;
-        try {
-            const response = await fetch(qrImage.src);
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
+        const response = await fetch(qrImage.src);
+        const blob = await response.blob();
+        const a = document.createElement('a');
+        a.href = window.URL.createObjectURL(blob);
+        a.download = `PackProof_Label_${lastTrackingId}.png`;
+        a.click();
+    });
+
+    // 2. Скачать красивую карточку покупателю (с QR, ссылкой и PIN-кодом)
+    downloadCardBtn.addEventListener('click', () => {
+        if (!qrImage.src) return;
+
+        const c = document.createElement('canvas');
+        c.width = 600;
+        c.height = 750;
+        const cx = c.getContext('2d');
+
+        // Фон
+        cx.fillStyle = "#0f172a";
+        cx.fillRect(0, 0, 600, 750);
+
+        // Рамка карточки
+        cx.strokeStyle = "#38bdf8";
+        cx.lineWidth = 4;
+        cx.strokeRect(20, 20, 560, 710);
+
+        // Заголовок
+        cx.fillStyle = "#38bdf8";
+        cx.font = "bold 32px sans-serif";
+        cx.textAlign = "center";
+        cx.fillText("PackProof Inspection", 300, 70);
+
+        cx.fillStyle = "#94a3b8";
+        cx.font = "18px sans-serif";
+        cx.fillText("Visuelle Verpackungssicherung", 300, 100);
+
+        // Поле с QR кодом
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = qrImage.src;
+        img.onload = () => {
+            cx.fillStyle = "#ffffff";
+            cx.beginPath();
+            cx.roundRect(175, 130, 250, 250, 16);
+            cx.fill();
+
+            cx.drawImage(img, 185, 140, 230, 230);
+
+            // Текстовая ссылка под QR
+            cx.fillStyle = "#cbd5e1";
+            cx.font = "16px monospace";
+            const linkText = `https://packproofinspection.com/verify?id=${lastTrackingId}`;
+            cx.fillText(linkText, 300, 420);
+
+            // Блок ПИН-кода
+            cx.fillStyle = "#1e293b";
+            cx.beginPath();
+            cx.roundRect(80, 460, 440, 150, 12);
+            cx.fill();
+            cx.strokeStyle = "#22c55e";
+            cx.lineWidth = 2;
+            cx.stroke();
+
+            cx.fillStyle = "#94a3b8";
+            cx.font = "18px sans-serif";
+            cx.fillText("Sicherheits-PIN für Unboxing:", 300, 500);
+
+            cx.fillStyle = "#22c55e";
+            cx.font = "bold 42px monospace";
+            cx.fillText(currentPin, 300, 560);
+
+            // Футер карточки
+            cx.fillStyle = "#64748b";
+            cx.font = "14px sans-serif";
+            cx.fillText("Scannen Sie den QR-Code oder nutzen Sie den Link.", 300, 650);
+            cx.fillText("Verwenden Sie den PIN, um Ihr Unboxing-Video aufzunehmen.", 300, 675);
+
+            // Скачивание готовой картинки
             const a = document.createElement('a');
-            a.href = url;
-            a.download = `PackProof_QR_${lastTrackingId}.png`;
-            document.body.appendChild(a);
+            a.href = c.toDataURL('image/png');
+            a.download = `PackProof_ClientCard_${lastTrackingId}.png`;
             a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
-        } catch (e) {
-            alert("Fehler beim Herunterladen des QR-Codes.");
-        }
+        };
     });
 
     function showStatus(msg, isError) {
