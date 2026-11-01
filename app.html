@@ -40,23 +40,34 @@
             gap: 16px;
         }
 
-        .header {
-            text-align: center;
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .header h1 {
-            margin: 0 0 4px 0;
-            font-size: 1.6rem;
+            margin: 0;
+            font-size: 1.5rem;
             color: var(--accent);
         }
 
-        .header p {
-            margin: 0;
+        .lang-select {
+            background: #334155;
+            border: 1px solid #475569;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .subtitle {
+            margin: -8px 0 0 0;
             font-size: 0.85rem;
             color: var(--subtext);
         }
 
-        /* Инструкция */
         details.instruction-box {
             background: #0f172a;
             border: 1px solid #334155;
@@ -86,7 +97,7 @@
         .input-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
         label {
@@ -112,7 +123,6 @@
         .mode-hint {
             font-size: 0.75rem;
             color: var(--subtext);
-            margin-top: -4px;
         }
 
         .video-wrapper {
@@ -130,8 +140,37 @@
             object-fit: cover;
         }
 
-        canvas {
+        canvas { display: none; }
+
+        /* Индикатор записи REC */
+        .rec-overlay {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
             display: none;
+            align-items: center;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .rec-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--danger);
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.2; }
+            100% { opacity: 1; }
         }
 
         .controls {
@@ -157,6 +196,9 @@
 
         .btn-upload { background: var(--success); color: #fff; }
         .btn-upload:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-secondary { background: #475569; color: #fff; margin-top: 6px; }
+        .btn-secondary:hover { background: #334155; }
 
         .status {
             font-size: 0.875rem;
@@ -189,18 +231,25 @@
 <body>
 
 <div class="container">
-    <div class="header">
-        <h1>PackProof Inspection</h1>
-        <p>Visuelle Verpackungssicherung & Qualitätsnachweis</p>
+    <div class="header-top">
+        <div class="header">
+            <h1>PackProof</h1>
+        </div>
+        <select id="langSelect" class="lang-select">
+            <option value="de">🇩🇪 DE</option>
+            <option value="en">🇬🇧 EN</option>
+            <option value="ru">🇺🇦 RU</option>
+        </select>
     </div>
+    <p class="subtitle" id="t-subtitle">Visuelle Verpackungssicherung & Qualitätsnachweis</p>
 
     <!-- Инструкция -->
     <details class="instruction-box">
-        <summary>ℹ️ Kurzanleitung / Как пользоваться?</summary>
+        <summary id="t-guide-title">ℹ️ Kurzanleitung</summary>
         <div class="instruction-content">
-            <ol>
+            <ol id="t-guide-steps">
                 <li>Geben Sie die <b>Sendungsnummer / ID</b> ein.</li>
-                <li>Wählen Sie den <b>Aufnahmemodus</b> (Time-Lapse für lange Verpackungen oder Standard für Details).</li>
+                <li>Wählen Sie den <b>Aufnahmemodus</b> (Time-Lapse oder Standard).</li>
                 <li>Klicken Sie auf <b>"Aufnahme starten"</b> und verpacken Sie die Ware.</li>
                 <li>Klicken Sie auf <b>"Hochladen & Verifizieren"</b> um den QR-Code zu erstellen.</li>
             </ol>
@@ -208,22 +257,24 @@
     </details>
 
     <div class="input-group">
-        <label for="trackingId">Sendungsnummer / ID:</label>
+        <label id="t-label-id" for="trackingId">Sendungsnummer / ID:</label>
         <input type="text" id="trackingId" placeholder="z. B. DE123456789">
     </div>
 
     <div class="input-group">
-        <label for="modeSelect">Aufnahmemodus (Режим записи):</label>
+        <label id="t-label-mode" for="modeSelect">Aufnahmemodus:</label>
         <select id="modeSelect">
-            <option value="timelapse">⚡ Time-Lapse (Schnell, ideal für lange Verpackung)</option>
-            <option value="standard">📹 Standard Video 1x (Für kleine/große Details)</option>
+            <option value="timelapse" id="t-opt-timelapse">⚡ Time-Lapse (Schnell, ideal für Verpackung)</option>
+            <option value="standard" id="t-opt-standard">📹 Standard Video 1x (Für hohe Details)</option>
         </select>
-        <div id="modeHint" class="mode-hint">
-            Time-Lapse: Захват кадра каждые 0.5 сек (ускорение в 15x, минимум размера).
-        </div>
+        <div id="modeHint" class="mode-hint"></div>
     </div>
 
     <div class="video-wrapper">
+        <div id="recOverlay" class="rec-overlay">
+            <div class="rec-dot"></div>
+            <span id="recText">REC 00:00</span>
+        </div>
         <video id="preview" autoplay muted playsinline></video>
         <canvas id="recordCanvas"></canvas>
     </div>
@@ -236,13 +287,95 @@
     <div id="statusMsg" class="status"></div>
 
     <div id="qrSection" class="qr-section">
-        <h3>Bestätigungs-QR-Code:</h3>
+        <h3 id="t-qr-title">Bestätigungs-QR-Code:</h3>
         <img id="qrImage" src="" alt="QR Code">
-        <button onclick="resetForm()" class="btn-start" style="width:100%;">Nächstes Video aufnehmen</button>
+        <button id="downloadQrBtn" class="btn-secondary" style="width:100%;">📥 QR-Code herunterladen</button>
+        <button onclick="resetForm()" id="t-next-btn" class="btn-start" style="width:100%; margin-top:4px;">Nächstes Video aufnehmen</button>
     </div>
 </div>
 
 <script>
+    const i18n = {
+        de: {
+            subtitle: "Visuelle Verpackungssicherung & Qualitätsnachweis",
+            guideTitle: "ℹ️ Kurzanleitung",
+            guideSteps: `
+                <li>Geben Sie die <b>Sendungsnummer / ID</b> ein.</li>
+                <li>Wählen Sie den <b>Aufnahmemodus</b> (Time-Lapse oder Standard).</li>
+                <li>Klicken Sie auf <b>"Aufnahme starten"</b> und verpacken Sie die Ware.</li>
+                <li>Klicken Sie auf <b>"Hochladen & Verifizieren"</b> um den QR-Code zu erstellen.</li>
+            `,
+            labelId: "Sendungsnummer / ID:",
+            labelMode: "Aufnahmemodus:",
+            optTimelapse: "⚡ Time-Lapse (Schnell, ideal für Verpackung)",
+            optStandard: "📹 Standard Video 1x (Für hohe Details)",
+            hintTimelapse: "Time-Lapse: Erfasst alle 0,5 Sek. ein Bild (15x Beschleunigung, minimale Dateigröße).",
+            hintStandard: "Standard 1x: Normale Videoaufnahme in Echtzeit für maximale Detailgenauigkeit.",
+            btnStart: "Aufnahme starten",
+            btnStop: "Aufnahme stoppen",
+            btnUpload: "Hochladen & Verifizieren",
+            qrTitle: "Bestätigungs-QR-Code:",
+            btnDownloadQr: "📥 QR-Code herunterladen",
+            btnNext: "Nächstes Video aufnehmen",
+            msgRecording: "Aufnahme läuft...",
+            msgReady: "Aufnahme bereit zum Hochladen.",
+            msgUploading: "Wird hochgeladen...",
+            msgSuccess: "Erfolgreich hochgeladen!"
+        },
+        en: {
+            subtitle: "Visual Packing Verification & Proof System",
+            guideTitle: "ℹ️ User Guide",
+            guideSteps: `
+                <li>Enter the <b>Tracking ID / Order Number</b>.</li>
+                <li>Select the <b>Recording Mode</b> (Time-Lapse or Standard).</li>
+                <li>Click <b>"Start Recording"</b> and pack the item.</li>
+                <li>Click <b>"Upload & Verify"</b> to generate the QR code.</li>
+            `,
+            labelId: "Tracking ID / Order Number:",
+            labelMode: "Recording Mode:",
+            optTimelapse: "⚡ Time-Lapse (Fast, ideal for packing)",
+            optStandard: "📹 Standard Video 1x (For fine details)",
+            hintTimelapse: "Time-Lapse: Captures frame every 0.5s (15x speed, minimal file size).",
+            hintStandard: "Standard 1x: Real-time normal video recording for maximum detail.",
+            btnStart: "Start Recording",
+            btnStop: "Stop Recording",
+            btnUpload: "Upload & Verify",
+            qrTitle: "Verification QR Code:",
+            btnDownloadQr: "📥 Download QR Code",
+            btnNext: "Record Next Video",
+            msgRecording: "Recording in progress...",
+            msgReady: "Recording ready for upload.",
+            msgUploading: "Uploading...",
+            msgSuccess: "Uploaded successfully!"
+        },
+        ru: {
+            subtitle: "Визуальная фиксация упаковки и контроль качества",
+            guideTitle: "ℹ️ Инструкция",
+            guideSteps: `
+                <li>Введите <b>Трек-номер / ID заказа</b>.</li>
+                <li>Выберите <b>Режим записи</b> (Таймлапс или Обычное видео).</li>
+                <li>Нажмите <b>"Начать запись"</b> и упакуйте товар.</li>
+                <li>Нажмите <b>"Загрузить и проверить"</b> для создания QR-кода.</li>
+            `,
+            labelId: "Трек-номер / ID заказа:",
+            labelMode: "Режим записи:",
+            optTimelapse: "⚡ Таймлапс (Быстро, идеально для упаковки)",
+            optStandard: "📹 Обычное видео 1x (Для мелких деталей)",
+            hintTimelapse: "Таймлапс: Съемка 1 кадра каждые 0.5 сек (ускорение 15x, минимальный размер).",
+            hintStandard: "Обычное 1x: Запись видео в реальном времени с максимальной детализацией.",
+            btnStart: "Начать запись",
+            btnStop: "Остановить запись",
+            btnUpload: "Загрузить и проверить",
+            qrTitle: "Подтверждающий QR-код:",
+            btnDownloadQr: "📥 Скачать QR-код",
+            btnNext: "Записать следующее видео",
+            msgRecording: "Идет запись...",
+            msgReady: "Запись готова к загрузке.",
+            msgUploading: "Загрузка на сервер...",
+            msgSuccess: "Успешно загружено!"
+        }
+    };
+
     const preview = document.getElementById('preview');
     const recordCanvas = document.getElementById('recordCanvas');
     const ctx = recordCanvas.getContext('2d');
@@ -251,24 +384,53 @@
     const statusMsg = document.getElementById('statusMsg');
     const qrSection = document.getElementById('qrSection');
     const qrImage = document.getElementById('qrImage');
+    const downloadQrBtn = document.getElementById('downloadQrBtn');
     const trackingInput = document.getElementById('trackingId');
     const modeSelect = document.getElementById('modeSelect');
     const modeHint = document.getElementById('modeHint');
+    const langSelect = document.getElementById('langSelect');
+    const recOverlay = document.getElementById('recOverlay');
+    const recText = document.getElementById('recText');
 
     let stream = null;
     let mediaRecorder = null;
     let recordedChunks = [];
     let isRecording = false;
     let lapseInterval = null;
+    let timerInterval = null;
+    let secondsRecorded = 0;
+    let currentLang = 'de';
 
-    // Подсказка при смене режима
-    modeSelect.addEventListener('change', () => {
-        if (modeSelect.value === 'timelapse') {
-            modeHint.textContent = "Time-Lapse: Захват кадра каждые 0.5 сек (ускорение в 15x, минимум размера).";
+    function setLanguage(lang) {
+        currentLang = lang;
+        const t = i18n[lang];
+        document.getElementById('t-subtitle').textContent = t.subtitle;
+        document.getElementById('t-guide-title').textContent = t.guideTitle;
+        document.getElementById('t-guide-steps').innerHTML = t.guideSteps;
+        document.getElementById('t-label-id').textContent = t.labelId;
+        document.getElementById('t-label-mode').textContent = t.labelMode;
+        document.getElementById('t-opt-timelapse').textContent = t.optTimelapse;
+        document.getElementById('t-opt-standard').textContent = t.optStandard;
+        document.getElementById('t-qr-title').textContent = t.qrTitle;
+        downloadQrBtn.textContent = t.btnDownloadQr;
+        document.getElementById('t-next-btn').textContent = t.btnNext;
+        
+        if (!isRecording) {
+            recordBtn.textContent = t.btnStart;
         } else {
-            modeHint.textContent = "Standard 1x: Запись нормального видео с обычной скоростью (для высокой детализации).";
+            recordBtn.textContent = t.btnStop;
         }
-    });
+        uploadBtn.textContent = t.btnUpload;
+        updateModeHint();
+    }
+
+    function updateModeHint() {
+        const t = i18n[currentLang];
+        modeHint.textContent = modeSelect.value === 'timelapse' ? t.hintTimelapse : t.hintStandard;
+    }
+
+    langSelect.addEventListener('change', (e) => setLanguage(e.target.value));
+    modeSelect.addEventListener('change', updateModeHint);
 
     async function initCamera() {
         try {
@@ -280,6 +442,7 @@
     }
 
     initCamera();
+    setLanguage('de');
 
     recordBtn.addEventListener('click', () => {
         if (!isRecording) {
@@ -292,6 +455,7 @@
     function startRecording() {
         recordedChunks = [];
         const mode = modeSelect.value;
+        secondsRecorded = 0;
 
         if (mode === 'timelapse') {
             const videoTrack = stream.getVideoTracks()[0];
@@ -304,12 +468,11 @@
 
             lapseInterval = setInterval(() => {
                 ctx.drawImage(preview, 0, 0, recordCanvas.width, recordCanvas.height);
-            }, 500); // 0.5 сек
+            }, 500);
 
             const canvasStream = recordCanvas.captureStream(30);
             mediaRecorder = new MediaRecorder(canvasStream, { mimeType: 'video/webm' });
         } else {
-            // Обычная запись 1x
             mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
         }
 
@@ -320,36 +483,52 @@
         mediaRecorder.start();
         isRecording = true;
 
-        recordBtn.textContent = "Aufnahme stoppen";
+        // Включаем таймер и плашку REC
+        recOverlay.style.display = 'flex';
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+            secondsRecorded++;
+            updateTimerDisplay();
+        }, 1000);
+
+        recordBtn.textContent = i18n[currentLang].btnStop;
         recordBtn.className = "btn-stop";
         uploadBtn.disabled = true;
-        showStatus(`Aufnahme läuft (${mode === 'timelapse' ? 'Time-Lapse' : 'Standard 1x'})...`, false);
+        showStatus(i18n[currentLang].msgRecording, false);
+    }
+
+    function updateTimerDisplay() {
+        const mins = String(Math.floor(secondsRecorded / 60)).padStart(2, '0');
+        const secs = String(secondsRecorded % 60).padStart(2, '0');
+        recText.textContent = `REC ${mins}:${secs}`;
     }
 
     function stopRecording() {
-        if (lapseInterval) {
-            clearInterval(lapseInterval);
-            lapseInterval = null;
-        }
+        if (lapseInterval) { clearInterval(lapseInterval); lapseInterval = null; }
+        if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+        
+        recOverlay.style.display = 'none';
         mediaRecorder.stop();
         isRecording = false;
 
-        recordBtn.textContent = "Aufnahme starten";
+        recordBtn.textContent = i18n[currentLang].btnStart;
         recordBtn.className = "btn-start";
         uploadBtn.disabled = false;
-        showStatus("Aufnahme bereit zum Hochladen.", false);
+        showStatus(i18n[currentLang].msgReady, false);
     }
 
+    let lastTrackingId = "";
+
     uploadBtn.addEventListener('click', async () => {
-        const trackingId = trackingInput.value.trim() || "ID_" + Date.now();
+        lastTrackingId = trackingInput.value.trim() || "ID_" + Date.now();
         const blob = new Blob(recordedChunks, { type: 'video/webm' });
 
         const formData = new FormData();
-        formData.append("file", blob, `${trackingId}.webm`);
-        formData.append("tracking_id", trackingId);
+        formData.append("file", blob, `${lastTrackingId}.webm`);
+        formData.append("tracking_id", lastTrackingId);
 
         uploadBtn.disabled = true;
-        showStatus("Wird hochgeladen...", false);
+        showStatus(i18n[currentLang].msgUploading, false);
 
         try {
             const res = await fetch("/api/upload", {
@@ -363,12 +542,32 @@
             }
 
             const data = await res.json();
-            qrImage.src = `/api/qr/${encodeURIComponent(data.tracking_id)}`;
+            const qrUrl = `/api/qr/${encodeURIComponent(data.tracking_id)}`;
+            qrImage.src = qrUrl;
             qrSection.style.display = 'flex';
-            showStatus("Erfolgreich hochgeladen!", false);
+            showStatus(i18n[currentLang].msgSuccess, false);
         } catch (err) {
             showStatus(err.message, true);
             uploadBtn.disabled = false;
+        }
+    });
+
+    // Функция скачивания QR-кода
+    downloadQrBtn.addEventListener('click', async () => {
+        if (!qrImage.src) return;
+        try {
+            const response = await fetch(qrImage.src);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `PackProof_QR_${lastTrackingId}.png`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (e) {
+            alert("Fehler beim Herunterladen des QR-Codes.");
         }
     });
 
