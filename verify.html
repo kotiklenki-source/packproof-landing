@@ -3,112 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PackProof — Verpackungsnachweis</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>PackProof — Nachweis & Verifikation</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #38bdf8;
+            --text-color: #f8fafc;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --subtext: #94a3b8;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .header h1 { margin: 0; font-size: 1.5rem; color: var(--accent); text-align: center; }
+
+        .status-badge {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid var(--success);
+            color: #4ade80;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .video-box { width: 100%; aspect-ratio: 4/3; background: #000; border-radius: 12px; overflow: hidden; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+
+        .info-card {
+            background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px;
+            display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem;
+        }
+
+        .info-row { display: flex; justify-content: space-between; color: var(--subtext); }
+        .info-row span.val { color: #fff; font-weight: 600; }
+
+        .unboxing-section {
+            background: #0f172a; border: 1px dashed var(--accent); border-radius: 8px; padding: 16px;
+            display: flex; flex-direction: column; gap: 10px; text-align: center;
+        }
+
+        input { background: #334155; border: 1px solid #475569; color: #fff; padding: 10px; border-radius: 6px; outline: none; }
+
+        button { padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btn-primary { background: var(--accent); color: #000; }
+        .btn-success { background: var(--success); color: #fff; }
+        .btn-outline { background: transparent; border: 1px solid #475569; color: #fff; }
+
+        @media print {
+            body { background: #fff; color: #000; }
+            .container { box-shadow: none; border: 1px solid #ccc; max-width: 100%; }
+            button, .unboxing-section { display: none !important; }
+        }
+    </style>
 </head>
-<body class="bg-slate-900 text-white min-h-screen flex flex-col items-center justify-center p-4">
+<body>
 
-    <div class="max-w-md w-full bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden p-6 text-center">
-        <!-- Logo Header -->
-        <div class="mb-6 flex items-center justify-center gap-2">
-            <i class="fa-solid fa-shield-halved text-emerald-400 text-3xl"></i>
-            <span class="text-2xl font-bold tracking-wide">PackProof</span>
-        </div>
-
-        <!-- Loading Spinner -->
-        <div id="loading" class="py-12">
-            <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-400 border-t-transparent"></div>
-            <p class="mt-4 text-slate-400">Verpackungsnachweis wird geladen...</p>
-        </div>
-
-        <!-- Error Card -->
-        <div id="errorCard" class="hidden bg-rose-500/10 border border-rose-500/30 rounded-xl p-6 my-4">
-            <i class="fa-solid fa-circle-xmark text-rose-500 text-4xl mb-3"></i>
-            <h2 class="text-xl font-bold text-rose-400 mb-2">Verpackungsnachweis nicht gefunden</h2>
-            <p class="text-slate-300 text-sm">Für diese Bestellnummer wurde noch keine Dokumentation im System hinterlegt oder der Link ist ungültig.</p>
-        </div>
-
-        <!-- Success Content / Video Player -->
-        <div id="successContent" class="hidden">
-            <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mb-6 flex items-center gap-3 text-left">
-                <i class="fa-solid fa-circle-check text-emerald-400 text-2xl"></i>
-                <div>
-                    <h3 class="font-semibold text-emerald-400">Verifiziert & Gesichert</h3>
-                    <p class="text-xs text-slate-300">Sendungs-ID: <span id="displayTrackingId" class="font-mono text-white font-bold"></span></p>
-                </div>
-            </div>
-
-            <!-- Video Player -->
-            <div class="relative rounded-xl overflow-hidden bg-black border border-slate-700 shadow-inner mb-4">
-                <video id="videoPlayer" class="w-full h-auto max-h-[450px]" controls autoplay muted playsinline>
-                    Ihr Browser unterstützt dieses Videoformat nicht.
-                </video>
-            </div>
-
-            <div class="text-left bg-slate-900/60 rounded-lg p-3 border border-slate-700/50 text-xs text-slate-400 space-y-1">
-                <p><span class="font-semibold text-slate-300">SHA-256 Hash:</span></p>
-                <p id="displayHash" class="font-mono break-all text-[10px] text-emerald-400/80"></p>
-            </div>
-        </div>
-        
-        <div class="mt-6 pt-4 border-t border-slate-700/60 text-xs text-slate-500">
-            &copy; PackProof Inspection System
-        </div>
+<div class="container">
+    <div class="header">
+        <h1>PackProof Inspection</h1>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const loading = document.getElementById('loading');
-            const errorCard = document.getElementById('errorCard');
-            const successContent = document.getElementById('successContent');
-            const videoPlayer = document.getElementById('videoPlayer');
-            const displayTrackingId = document.getElementById('displayTrackingId');
-            const displayHash = document.getElementById('displayHash');
+    <div id="loading" style="text-align:center;">Verifizierung läuft...</div>
 
-            // Парсим параметры из URL: поддерживаем ?id=..., ?tracking_id=... и путь /verify/ID
-            const urlParams = new URLSearchParams(window.location.search);
-            let identifier = urlParams.get('id') || urlParams.get('tracking_id') || urlParams.get('identifier');
+    <div id="content" style="display:none; flex-direction:column; gap:16px;">
+        <div class="status-badge">✅ Verifiziert & Gesichert</div>
 
-            // Если параметров нет в query string, пробуем взять из пути URL
-            if (!identifier) {
-                const pathParts = window.location.pathname.split('/').filter(p => p);
-                if (pathParts.length > 1 && pathParts[0] === 'verify') {
-                    identifier = pathParts[1];
+        <h3>📦 Verpackung durch Verkäufer (Видео продавца):</h3>
+        <div class="video-box">
+            <video id="videoPlayer" controls playsinline></video>
+        </div>
+
+        <div class="info-card">
+            <div class="info-row"><span>Sendungs-ID:</span><span class="val" id="dispTrackingId">-</span></div>
+            <div class="info-row"><span>SHA-256 Hash:</span><span class="val" id="dispHash" style="font-size:0.75rem;">-</span></div>
+        </div>
+
+        <!-- Раздел видео от покупателя -->
+        <div id="unboxingDisplay" style="display:none;" class="video-box">
+            <h3>🎁 Auspacken durch Käufer (Ответное видео распаковки):</h3>
+            <video id="unboxingPlayer" controls playsinline></video>
+        </div>
+
+        <!-- Кнопка и диалог для покупателя -->
+        <div class="unboxing-section" id="buyerAuthBox">
+            <h4 style="margin:0;">📦 Системная авторизация покупателя</h4>
+            <p style="margin:0; font-size:0.8rem; color:var(--subtext);">Введите ПИН-код из SMS или упаковки, чтобы записать видео распаковки:</p>
+            <input type="password" id="pinInput" placeholder="PIN-Code (z.B. 1234)">
+            <button onclick="unlockUnboxing()" class="btn-primary">🔐 Авторизоваться и открыть камеру</button>
+        </div>
+
+        <div class="unboxing-section" id="camRecorderBox" style="display:none;">
+            <video id="camPreview" autoplay muted playsinline style="width:100%; border-radius:8px;"></video>
+            <button id="recBtn" onclick="toggleUnboxingRec()" class="btn-primary">🔴 Начать запись распаковки</button>
+        </div>
+
+        <button onclick="window.print()" class="btn-outline">📄 Сформировать двусторонний отчёт PDF</button>
+    </div>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const trackingId = urlParams.get('id');
+
+    let stream = null;
+    let mediaRecorder = null;
+    let chunks = [];
+    let isRecording = false;
+
+    async function loadVerification() {
+        try {
+            const res = await fetch(`/api/verify/${encodeURIComponent(trackingId)}`);
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+
+            document.getElementById('dispTrackingId').textContent = data.tracking_id;
+            document.getElementById('dispHash').textContent = data.sha256;
+            document.getElementById('videoPlayer').src = data.video_url;
+
+            if (data.unboxing_video_url) {
+                document.getElementById('unboxingPlayer').src = data.unboxing_video_url;
+                document.getElementById('unboxingDisplay').style.display = 'block';
+                document.getElementById('buyerAuthBox').style.display = 'none';
+            }
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'flex';
+        } catch (e) {
+            document.getElementById('loading').textContent = "⚠️ Nachweis nicht gefunden.";
+        }
+    }
+
+    async function unlockUnboxing() {
+        const pin = document.getElementById('pinInput').value.trim();
+        if (!pin) return alert("Bitte PIN eingeben!");
+
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            document.getElementById('camPreview').srcObject = stream;
+            document.getElementById('buyerAuthBox').style.display = 'none';
+            document.getElementById('camRecorderBox').style.display = 'flex';
+        } catch (e) {
+            alert("Kamera-Zugriff fehlgeschlagen: " + e.message);
+        }
+    }
+
+    function toggleUnboxingRec() {
+        const btn = document.getElementById('recBtn');
+        if (!isRecording) {
+            chunks = [];
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+            mediaRecorder.ondataavailable = e => chunks.push(e.data);
+            mediaRecorder.start();
+            isRecording = true;
+            btn.textContent = "⏹️ Остановить и выгрузить";
+            btn.className = "btn-success";
+        } else {
+            mediaRecorder.stop();
+            isRecording = false;
+            btn.textContent = "Загрузка...";
+            btn.disabled = true;
+
+            setTimeout(async () => {
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                const formData = new FormData();
+                formData.append("file", blob, `unboxing_${trackingId}.webm`);
+                formData.append("tracking_id", trackingId);
+                formData.append("pin", document.getElementById('pinInput').value.trim());
+
+                const res = await fetch("/api/upload-unboxing", { method: "POST", body: formData });
+                if (res.ok) {
+                    alert("Unboxing-Video erfolgreich gespeichert!");
+                    location.reload();
+                } else {
+                    const err = await res.json();
+                    alert("Fehler: " + err.detail);
+                    btn.disabled = false;
+                    btn.textContent = "🔴 Начать запись распаковки";
                 }
-            }
+            }, 1000);
+        }
+    }
 
-            if (!identifier) {
-                loading.classList.add('hidden');
-                errorCard.classList.remove('hidden');
-                return;
-            }
+    loadVerification();
+</script>
 
-            // Запрос верификации к бэкенду
-            fetch(`/api/verify/${encodeURIComponent(identifier)}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Verification failed');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    loading.classList.add('hidden');
-                    if (data.status === 'verified' && data.video_url) {
-                        displayTrackingId.textContent = data.tracking_id || identifier;
-                        displayHash.textContent = data.sha256 || 'N/A';
-                        videoPlayer.src = data.video_url;
-                        successContent.classList.remove('hidden');
-                    } else {
-                        errorCard.classList.remove('hidden');
-                    }
-                })
-                .catch(err => {
-                    console.error('Error fetching verification:', err);
-                    loading.classList.add('hidden');
-                    errorCard.classList.remove('hidden');
-                });
-        });
-    </script>
 </body>
 </html>

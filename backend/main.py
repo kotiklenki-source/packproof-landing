@@ -13,23 +13,19 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="PackProof Inspection API")
 
-# --- СВЕЖИЕ НАСТРОЙКИ CLOUDFLARE R2 (ADMIN ALL-BUCKETS) ---
+# --- НАСТРОЙКИ CLOUDFLARE R2 ---
 R2_ACCESS_KEY_ID = "2c1fab3667f17f8104af65c23398f493"
 R2_SECRET_ACCESS_KEY = "e72c3c21c30ab05321d10600aa90898f4168483a3037a01eedf282ac81af817c"
 R2_ENDPOINT_URL = "https://1ff6eaee49a620894ec41d70b1840a85.r2.cloudflarestorage.com"
 R2_BUCKET_NAME = "packproof-videos"
 
-# Настройка клиента boto3 с s3v4
 s3_client = boto3.client(
     's3',
     endpoint_url=R2_ENDPOINT_URL,
     aws_access_key_id=R2_ACCESS_KEY_ID,
     aws_secret_access_key=R2_SECRET_ACCESS_KEY,
     region_name='auto',
-    config=Config(
-        signature_version='s3v4',
-        s3={'addressing_style': 'path'}
-    )
+    config=Config(signature_version='s3v4', s3={'addressing_style': 'path'})
 )
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -53,7 +49,9 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             tracking_id TEXT NOT NULL,
             r2_key TEXT NOT NULL,
-            sha256 TEXT NOT NULL
+            sha256 TEXT NOT NULL,
+            secret_pin TEXT DEFAULT '1234',
+            unboxing_r2_key TEXT DEFAULT NULL
         )
     ''')
     conn.commit()
@@ -76,9 +74,6 @@ def save_json_db(data):
 
 video_db = load_json_db()
 
-
-# --- Маршруты страниц ---
-
 @app.get("/")
 async def read_root():
     return FileResponse(os.path.join(PROJECT_ROOT, "index.html"))
@@ -91,25 +86,19 @@ async def read_app():
 async def read_verify():
     return FileResponse(os.path.join(PROJECT_ROOT, "verify.html"))
 
-
-# --- Бэкенд API ---
-
 @app.post("/api/upload")
 async def upload_video(
     file: UploadFile = File(...), 
     tracking_id: str = Form(None),
-    id: str = Form(None),
-    order_id: str = Form(None)
+    secret_pin: str = Form("1234")
 ):
     try:
-        final_tracking_id = tracking_id or id or order_id or "UNKNOWN"
-        
+        final_id = tracking_id or "ID_" + str(int(time.time()))
         contents = await file.read()
         sha256_hash = hashlib.sha256(contents).hexdigest()
         file_ext = os.path.splitext(file.filename)[1] or ".webm"
-        r2_key = f"{final_tracking_id}_{sha256_hash[:8]}{file_ext}"
+        r2_key = f"pack_{final_id}_{sha256_hash[:8]}{file_ext}"
 
-        # Прямая выгрузка PutObject в Cloudflare R2
         s3_client.put_object(
             Bucket=R2_BUCKET_NAME,
             Key=r2_key,
@@ -120,31 +109,64 @@ async def upload_video(
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO videos (tracking_id, r2_key, sha256) VALUES (?, ?, ?)",
-            (final_tracking_id, r2_key, sha256_hash)
+            "INSERT INTO videos (tracking_id, r2_key, sha256, secret_pin) VALUES (?, ?, ?, ?)",
+            (final_id, r2_key, sha256_hash, secret_pin)
         )
         conn.commit()
         conn.close()
 
         video_info = {
-            "tracking_id": final_tracking_id,
+            "tracking_id": final_id,
             "r2_key": r2_key,
-            "sha256": sha256_hash
+            "sha256": sha256_hash,
+            "secret_pin": secret_pin,
+            "unboxing_r2_key": None
         }
-        video_db[sha256_hash] = video_info
-        video_db[final_tracking_id] = video_info
+        video_db[final_id] = video_info
         save_json_db(video_db)
 
-        return {
-            "status": "success",
-            "message": "Video uploaded to R2 successfully",
-            "tracking_id": final_tracking_id,
-            "sha256": sha256_hash
-        }
+        return {"status": "success", "tracking_id": final_id, "secret_pin": secret_pin}
     except Exception as e:
-        print(f"UPLOAD ERROR: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/api/upload-unboxing")
+async def upload_unboxing(
+    file: UploadFile = File(...),
+    tracking_id: str = Form(...),
+    pin: str = Form(...)
+):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT secret_pin FROM videos WHERE tracking_id = ?", (tracking_id,))
+    row = cursor.fetchone()
+    
+    saved_pin = row[0] if row else video_db.get(tracking_id, {}).get("secret_pin", "1234")
+    
+    if str(saved_pin) != str(pin):
+        conn.close()
+        raise HTTPException(status_code=403, detail="Falscher PIN / Неверный PIN-код")
+
+    contents = await file.read()
+    sha256_hash = hashlib.sha256(contents).hexdigest()
+    file_ext = os.path.splitext(file.filename)[1] or ".webm"
+    unboxing_key = f"unbox_{tracking_id}_{sha256_hash[:8]}{file_ext}"
+
+    s3_client.put_object(
+        Bucket=R2_BUCKET_NAME,
+        Key=unboxing_key,
+        Body=contents,
+        ContentType=file.content_type or "video/webm"
+    )
+
+    cursor.execute("UPDATE videos SET unboxing_r2_key = ? WHERE tracking_id = ?", (unboxing_key, tracking_id))
+    conn.commit()
+    conn.close()
+
+    if tracking_id in video_db:
+        video_db[tracking_id]["unboxing_r2_key"] = unboxing_key
+        save_json_db(video_db)
+
+    return {"status": "success", "message": "Unboxing video uploaded successfully"}
 
 @app.get("/api/qr/{tracking_id}")
 async def generate_qr(tracking_id: str):
@@ -160,46 +182,38 @@ async def generate_qr(tracking_id: str):
 
     return StreamingResponse(img_byte_arr, media_type="image/png")
 
-
 @app.get("/api/verify/{identifier}")
 async def verify_video(identifier: str):
-    r2_key = None
-    tracking_id = identifier
-    sha256_hash = ""
-
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT tracking_id, r2_key, sha256 FROM videos WHERE tracking_id = ? OR sha256 = ?",
-        (identifier, identifier)
+        "SELECT tracking_id, r2_key, sha256, unboxing_r2_key FROM videos WHERE tracking_id = ?",
+        (identifier,)
     )
     row = cursor.fetchone()
     conn.close()
 
-    if row:
-        tracking_id, r2_key, sha256_hash = row[0], row[1], row[2]
-    else:
-        video_info = video_db.get(identifier)
-        if video_info:
-            tracking_id = video_info["tracking_id"]
-            r2_key = video_info["r2_key"]
-            sha256_hash = video_info["sha256"]
-
-    if not r2_key:
+    if not row and identifier not in video_db:
         raise HTTPException(status_code=404, detail="Proof record not found")
 
-    signed_url = s3_client.generate_presigned_url(
-        'get_object',
-        Params={'Bucket': R2_BUCKET_NAME, 'Key': r2_key},
-        ExpiresIn=3600
-    )
+    if row:
+        t_id, r2_key, sha256_hash, unboxing_key = row[0], row[1], row[2], row[3]
+    else:
+        info = video_db[identifier]
+        t_id, r2_key, sha256_hash, unboxing_key = info["tracking_id"], info["r2_key"], info["sha256"], info.get("unboxing_r2_key")
+
+    pack_url = s3_client.generate_presigned_url('get_object', Params={'Bucket': R2_BUCKET_NAME, 'Key': r2_key}, ExpiresIn=3600)
+    
+    unbox_url = None
+    if unboxing_key:
+        unbox_url = s3_client.generate_presigned_url('get_object', Params={'Bucket': R2_BUCKET_NAME, 'Key': unboxing_key}, ExpiresIn=3600)
 
     return {
         "status": "verified",
-        "tracking_id": tracking_id,
+        "tracking_id": t_id,
         "sha256": sha256_hash,
-        "video_url": signed_url
+        "video_url": pack_url,
+        "unboxing_video_url": unbox_url
     }
-
 
 app.mount("/", StaticFiles(directory=PROJECT_ROOT, html=True), name="static")
