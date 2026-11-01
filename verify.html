@@ -59,6 +59,7 @@
             font-size: 0.75rem;
             padding: 3px 7px;
             border-radius: 6px;
+            letter-spacing: 0.5px;
         }
 
         .header h1 { margin: 0; font-size: 1.5rem; }
@@ -124,13 +125,13 @@
         <div class="header-logo-group">
             <span class="ppi-badge">PPI</span>
             <div class="header">
-                <h1><a href="/">PackProof</a></h1>
+                <h1><a href="/" title="PackProof Inspection">PackProof Inspection</a></h1>
             </div>
         </div>
         <select id="langSelect" class="lang-select">
-            <option value="de">🇩🇪 DE</option>
-            <option value="en">🇬🇧 EN</option>
-            <option value="ru">🇺🇦 RU</option>
+            <option value="de">DE</option>
+            <option value="en">EN</option>
+            <option value="ru">RU</option>
         </select>
     </div>
 
@@ -182,7 +183,8 @@
             btnAuth: "🔐 Kamera öffnen",
             btnPdf: "📄 Prüfbericht als PDF drucken",
             btnStartRec: "🔴 Auspacken aufnehmen",
-            btnStopRec: "⏹️ Stoppen & Hochladen"
+            btnStopRec: "⏹️ Stoppen & Hochladen",
+            errPin: "Falscher PIN-Code!"
         },
         en: {
             status: "✅ Verified & Secured",
@@ -194,7 +196,8 @@
             btnAuth: "🔐 Open Camera",
             btnPdf: "📄 Download PDF Report",
             btnStartRec: "🔴 Start Unboxing Record",
-            btnStopRec: "⏹️ Stop & Upload"
+            btnStopRec: "⏹️ Stop & Upload",
+            errPin: "Incorrect PIN Code!"
         },
         ru: {
             status: "✅ Подлинность подтверждена",
@@ -206,7 +209,8 @@
             btnAuth: "🔐 Открыть камеру",
             btnPdf: "📄 Сформировать отчёт PDF",
             btnStartRec: "🔴 Начать запись распаковки",
-            btnStopRec: "⏹️ Остановить и выгрузить"
+            btnStopRec: "⏹️ Остановить и выгрузить",
+            errPin: "Неверный ПИН-код!"
         }
     };
 
@@ -219,6 +223,7 @@
     let chunks = [];
     let isRecording = false;
     let currentLang = 'de';
+    let savedEnteredPin = ""; // Фиксируем ПИН при вводе
 
     function setLanguage(lang) {
         currentLang = lang;
@@ -271,7 +276,9 @@
 
     async function unlockUnboxing() {
         const pin = document.getElementById('pinInput').value.trim();
-        if (!pin) return alert("Bitte PIN eingeben!");
+        if (!pin) return alert(i18n[currentLang].errPin);
+
+        savedEnteredPin = pin; // Запоминаем введенный ПИН-код
 
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -306,14 +313,14 @@
                 const formData = new FormData();
                 formData.append("file", blob, `unboxing_${trackingId}.webm`);
                 formData.append("tracking_id", trackingId);
-                formData.append("pin", document.getElementById('pinInput').value.trim());
+                formData.append("pin", savedEnteredPin); // Отправляем зафиксированный ПИН
 
                 const res = await fetch("/api/upload-unboxing", { method: "POST", body: formData });
                 if (res.ok) {
                     location.reload();
                 } else {
                     const err = await res.json();
-                    alert("Error: " + err.detail);
+                    alert(err.detail || t.errPin);
                     btn.disabled = false;
                     btn.textContent = t.btnStartRec;
                 }

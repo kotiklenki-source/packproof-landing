@@ -61,7 +61,7 @@
             border-radius: 6px;
         }
 
-        .header h1 { margin: 0; font-size: 1.5rem; }
+        .header h1 { margin: 0; font-size: 1.35rem; }
         .header h1 a { color: var(--accent); text-decoration: none; }
 
         .btn-home {
@@ -156,14 +156,14 @@
     <div class="header-top">
         <div class="header-logo-group">
             <span class="ppi-badge">PPI</span>
-            <div class="header"><h1><a href="/">PackProof</a></h1></div>
+            <div class="header"><h1><a href="/" title="PackProof Inspection">PackProof Inspection</a></h1></div>
         </div>
         <div style="display:flex; gap:8px;">
-            <a href="/" id="btnHome" class="btn-home">🏠 Startseite</a>
+            <a href="/" id="btnHome" class="btn-home">Startseite</a>
             <select id="langSelect" class="lang-select">
-                <option value="de">🇩🇪 DE</option>
-                <option value="en">🇬🇧 EN</option>
-                <option value="ru">🇺🇦 RU</option>
+                <option value="de">DE</option>
+                <option value="en">EN</option>
+                <option value="ru">RU</option>
             </select>
         </div>
     </div>
@@ -237,7 +237,7 @@
 <script>
     const i18n = {
         de: {
-            btnHome: "🏠 Startseite",
+            btnHome: "Startseite",
             subtitle: "Visuelle Verpackungssicherung & Qualitätsnachweis",
             guideTitle: "ℹ️ Kurzanleitung",
             guideSteps: `
@@ -267,7 +267,7 @@
             msgSuccess: "Erfolgreich hochgeladen!"
         },
         en: {
-            btnHome: "🏠 Home",
+            btnHome: "Home",
             subtitle: "Visual Packing Verification & Proof System",
             guideTitle: "ℹ️ User Guide",
             guideSteps: `
@@ -297,7 +297,7 @@
             msgSuccess: "Uploaded successfully!"
         },
         ru: {
-            btnHome: "🏠 Главная",
+            btnHome: "Главная",
             subtitle: "Визуальная фиксация упаковки и контроль качества",
             guideTitle: "ℹ️ Инструкция",
             guideSteps: `
@@ -318,7 +318,7 @@
             qrTitle: "QR-код и PIN для покупателя:",
             pinTitle: "ПИН-код безопасности покупателя (Распаковка):",
             pinDesc: "Отправьте этот ПИН-код покупателю в сообщении!",
-            btnDownloadQr: "🏷️ Скачать этикетку (Друк на упаковку)",
+            btnDownloadQr: "🏷️ Скачать этикетку (Печать на упаковку)",
             btnDownloadCard: "✉️ Скачать открытку клиенту (Картинка для eBay/WhatsApp)",
             btnNext: "Записать следующее видео",
             msgRecording: "Идет запись...",
@@ -477,18 +477,47 @@
         }
     });
 
-    // 1. Скачать наклейку на коробку
-    downloadQrBtn.addEventListener('click', async () => {
+    // Функция врисовки бейджа PPI в центр QR
+    function drawPpiCenter(cx, x, y, size) {
+        cx.fillStyle = "#0f172a";
+        cx.fillRect(x - size/2, y - size/2, size, size);
+        cx.strokeStyle = "#22c55e";
+        cx.lineWidth = 2;
+        cx.strokeRect(x - size/2, y - size/2, size, size);
+
+        cx.fillStyle = "#22c55e";
+        cx.font = "bold 12px sans-serif";
+        cx.textAlign = "center";
+        cx.textBaseline = "middle";
+        cx.fillText("PPI", x, y);
+    }
+
+    // 1. Скачать наклейку на коробку (с врисованным логотипом PPI)
+    downloadQrBtn.addEventListener('click', () => {
         if (!qrImage.src) return;
-        const response = await fetch(qrImage.src);
-        const blob = await response.blob();
-        const a = document.createElement('a');
-        a.href = window.URL.createObjectURL(blob);
-        a.download = `PackProof_Label_${lastTrackingId}.png`;
-        a.click();
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = qrImage.src;
+        img.onload = () => {
+            const c = document.createElement('canvas');
+            c.width = 300;
+            c.height = 300;
+            const cx = c.getContext('2d');
+            cx.fillStyle = "#ffffff";
+            cx.fillRect(0, 0, 300, 300);
+            cx.drawImage(img, 10, 10, 280, 280);
+
+            // Отрисовка PPI в центре скачиваемого QR
+            drawPpiCenter(cx, 150, 150, 36);
+
+            const a = document.createElement('a');
+            a.href = c.toDataURL('image/png');
+            a.download = `PackProof_Label_${lastTrackingId}.png`;
+            a.click();
+        };
     });
 
-    // 2. Скачать красивую карточку покупателю (с QR, ссылкой и PIN-кодом)
+    // 2. Скачать открытку клиенту для eBay/WhatsApp
     downloadCardBtn.addEventListener('click', () => {
         if (!qrImage.src) return;
 
@@ -497,26 +526,23 @@
         c.height = 750;
         const cx = c.getContext('2d');
 
-        // Фон
         cx.fillStyle = "#0f172a";
         cx.fillRect(0, 0, 600, 750);
 
-        // Рамка карточки
         cx.strokeStyle = "#38bdf8";
         cx.lineWidth = 4;
         cx.strokeRect(20, 20, 560, 710);
 
-        // Заголовок
         cx.fillStyle = "#38bdf8";
-        cx.font = "bold 32px sans-serif";
+        cx.font = "bold 30px sans-serif";
         cx.textAlign = "center";
+        cx.textBaseline = "alphabetic";
         cx.fillText("PackProof Inspection", 300, 70);
 
         cx.fillStyle = "#94a3b8";
         cx.font = "18px sans-serif";
         cx.fillText("Visuelle Verpackungssicherung", 300, 100);
 
-        // Поле с QR кодом
         const img = new Image();
         img.crossOrigin = "anonymous";
         img.src = qrImage.src;
@@ -528,13 +554,14 @@
 
             cx.drawImage(img, 185, 140, 230, 230);
 
-            // Текстовая ссылка под QR
+            // Отрисовка логотипа PPI в центре QR
+            drawPpiCenter(cx, 300, 255, 42);
+
             cx.fillStyle = "#cbd5e1";
             cx.font = "16px monospace";
             const linkText = `https://packproofinspection.com/verify?id=${lastTrackingId}`;
             cx.fillText(linkText, 300, 420);
 
-            // Блок ПИН-кода
             cx.fillStyle = "#1e293b";
             cx.beginPath();
             cx.roundRect(80, 460, 440, 150, 12);
@@ -551,13 +578,11 @@
             cx.font = "bold 42px monospace";
             cx.fillText(currentPin, 300, 560);
 
-            // Футер карточки
             cx.fillStyle = "#64748b";
             cx.font = "14px sans-serif";
             cx.fillText("Scannen Sie den QR-Code oder nutzen Sie den Link.", 300, 650);
             cx.fillText("Verwenden Sie den PIN, um Ihr Unboxing-Video aufzunehmen.", 300, 675);
 
-            // Скачивание готовой картинки
             const a = document.createElement('a');
             a.href = c.toDataURL('image/png');
             a.download = `PackProof_ClientCard_${lastTrackingId}.png`;
