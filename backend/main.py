@@ -4,7 +4,7 @@ import json
 import hashlib
 import qrcode
 import boto3
-import requests
+import urllib.request
 from io import BytesIO
 from botocore.config import Config
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
@@ -118,15 +118,17 @@ async def upload_video(
             ExpiresIn=600
         )
 
-        # 2. Выполняем загрузку бинарных данных через прямой HTTP PUT запрос
-        response = requests.put(
+        # 2. Выполняем загрузку через встроенный urllib без внешних зависимостей
+        req = urllib.request.Request(
             upload_url,
             data=contents,
-            headers={'Content-Type': file.content_type or 'video/webm'}
+            headers={'Content-Type': file.content_type or 'video/webm'},
+            method='PUT'
         )
-
-        if response.status_code not in (200, 201):
-            raise Exception(f"R2 Upload HTTP Error {response.status_code}: {response.text}")
+        
+        with urllib.request.urlopen(req) as response:
+            if response.status not in (200, 201):
+                raise Exception(f"R2 Upload HTTP Error {response.status}")
 
         # 3. Сохраняем записи в БД
         conn = sqlite3.connect(DB_PATH)
