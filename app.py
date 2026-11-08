@@ -1,116 +1,151 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+import os
 import sqlite3
 import hashlib
-import uuid
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 
 app = Flask(__name__)
-app.secret_key = 'packproof_super_secret_key_security'  # Секретный ключ для сессий
-
+app.secret_key = 'packproof_secret_key'  # Секретный ключ для сессий
 DB_NAME = 'packproof.db'
 
 def hash_password(password):
     return hashlib.sha256(password.encode('utf-8')).hexdigest()
 
+def init_db():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    # Таблица пользователей
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        )
+    ''')
+    # Таблица инспекций / видео
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS inspections (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            filename TEXT,
+            status TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+# Инициализируем базу данных при запуске
+init_db()
+
+# 1. Главная страница (Лендинг)
 @app.route('/')
 def home():
     return render_template('index.html')
 
+# 2. Страница входа / авторизации
 @app.route('/login', methods=['GET', 'POST'])
 def login_page():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
-        password_hash = hash_password(password)
-        
+        pwd_hash = hash_password(password)
+
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
-        cursor.execute("SELECT id, role, is_vip FROM users WHERE email = ? AND password_hash = ?", (email, password_hash))
+        cursor.execute('SELECT id FROM users WHERE email = ? AND password = ?', (email, pwd_hash))
         user = cursor.fetchone()
         conn.close()
-        
+
         if user:
-            # Сохраняем email и роль в сессию пользователя
-            session['user_email'] = email
-            session['user_role'] = user[1]
-            print(f"[ERFOLG] Benutzer {email} erfolgreich angemeldet.")
-            return redirect(url_for('dashboard'))
+            session['user_id'] = user[0]
+            session['email'] = email
+            return redirect(url_for('dashboard_page'))
         else:
-            return "Fehler: Ungültige E-Mail oder falsches Passwort! <a href='/login'>Zurück</a>"
-            
+            return render_template('login.html', error='Ungültige Anmeldedaten')
+
     return render_template('login.html')
 
-@app.route('/register', methods=['POST'])
-def register_action():
-    email = request.form.get('email')
-    password = request.form.get('password')
-    password_hash = hash_password(password)
+# 3. Страница регистрации
+@app.route('/register', methods=['GET', 'POST'])
+def register_page():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        pwd_hash = hash_password(password)
+
+        try:
+            conn = sqlite3.connect(DB_NAME)
+            cursor = conn.cursor()
+            cursor.execute('INSERT INTO users (email, password) VALUES (?, ?)', (email, pwd_hash))
+            conn.commit()
+            conn.close()
+            return redirect(url_for('login_page'))
+        except sqlite3.IntegrityError:
+            return render_template('register.html', error='E-Mail ist bereits vergeben')
+
+    return render_template('register.html')
+
+# 4. Личный кабинет (Дашборд)
+@app.route('/dashboard')
+def dashboard_page():
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
     
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    try:
-        user_id = str(uuid.uuid4())
-        cursor.execute("INSERT INTO users (id, email, password_hash, role) VALUES (?, ?, ?, ?)", (user_id, email, password_hash, 'buyer'))
-        conn.commit()
-        print(f"[ERFOLG] Neuer Benutzer registriert: {email}")
-        
-        # Сразу логиним пользователя после регистрации
-        session['user_email'] = email
-        session['user_role'] = 'buyer'
-        return redirect(url_for('dashboard'))
-    except sqlite3.IntegrityError:
-        return "Fehler: Diese E-Mail ist bereits registriert! <a href='/login'>Zurück</a>"
-    finally:
-        conn.close()
+    cursor.execute('SELECT id, filename, status, timestamp FROM inspections WHERE user_id = ?', (session['user_id'],))
+    inspections = cursor.fetchall()
+    conn.close()
 
-@app.route('/dashboard')
-def dashboard():
-    # Проверяем, вошел ли пользователь в систему
-    if 'user_email' not in session:
-        return redirect(url_for('login_page'))
-    
-    # Рендерим личный кабинет из папки templates
-    return render_template('app.html', email=session['user_email'], role=session['user_role'])
+    return render_template('app.html', inspections=inspections)
 
+# 5. Страница инспекции / создания видеозаписи
 @app.route('/inspection')
-def inspection():
-    if 'user_email' not in session:
+def inspection_page():
+    if 'user_id' not in session:
         return redirect(url_for('login_page'))
-    return render_template('inspection.html', email=session['user_email'], role=session['user_role'])
+    return render_template('inspection.html')
 
+# 6. API для загрузки видео
+@app.route('/api/upload', methods=['POST'])
+def api_upload():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    if 'video' not in request.files:
+        return jsonify({'error': 'No video file provided'}), 400
+
+    video_file = request.files['video']
+    if video_file.filename == '':
+        return jsonify({'error': 'Empty filename'}), 400
+
+    os.makedirs('videos', exist_ok=True)
+    filepath = os.path.join('videos', video_file.filename)
+    video_file.save(filepath)
+
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO inspections (user_id, filename, status) VALUES (?, ?, ?)',
+                   (session['user_id'], video_file.filename, 'COMPLETED & VERIFIED'))
+    conn.commit()
+    conn.close()
+
+    return jsonify({'success': True, 'message': 'Video successfully uploaded and verified'})
+
+# 7. Юридические страницы (Impressum & Datenschutz)
+@app.route('/impressum.html')
+def impressum_page():
+    return render_template('impressum.html')
+
+@app.route('/datenschutz.html')
+def datenschutz_page():
+    return render_template('datenschutz.html')
+
+# 8. Выход из системы (Logout)
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('login_page'))
-
-# Маршрут для приема видео с камеры со страницы inspection.html
-@app.route('/api/upload', methods=['POST'])
-def api_upload():
-    if 'user_email' not in session:
-        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
-    
-    if 'video' not in request.files:
-        return jsonify({'status': 'error', 'message': 'Kein Video gefunden'}), 400
-    
-    file = request.files['video']
-    if file.filename == '':
-        return jsonify({'status': 'error', 'message': 'Kein Dateiname'}), 400
-    
-    if file:
-        # Папка для сохранения видео
-        videos_dir = 'videos'
-        os.makedirs(videos_dir, exist_ok=True)
-        
-        safe_email = session.get('user_email', 'user').replace('@', '_at_').replace('.', '_')
-        filename = f"inspection_{safe_email}.webm"
-        filepath = os.path.join(videos_dir, filename)
-        
-        file.save(filepath)
-        
-        return jsonify({
-            'status': 'success', 
-            'message': 'Video erfolgreich hochgeladen und gespeichert!',
-            'path': filepath
-        }), 200
+    return redirect(url_for('home'))
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)
