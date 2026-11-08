@@ -4,3 +4,4 @@ python-multipart
 qrcode
 pillow
 boto3
+requests
