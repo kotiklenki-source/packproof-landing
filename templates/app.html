@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PackProof - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex">
+
+    <!-- Боковая панель навигации (Sidebar) -->
+    <aside class="w-64 bg-slate-800 border-r border-slate-700 flex flex-col justify-between hidden md:flex">
+        <div>
+            <div class="p-6 border-b border-slate-700">
+                <h1 class="text-2xl font-extrabold tracking-wider text-indigo-400">PackProof</h1>
+                <p class="text-xs text-slate-400 mt-1">Angemeldet als: <span class="text-slate-200 font-medium">{{ email }}</span></p>
+            </div>
+
+            <nav class="p-4 space-y-2">
+                <button onclick="switchSection('aufnahme')" id="nav-aufnahme" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium transition">
+                    <span>📹</span>
+                    <span>Video-Aufnahme</span>
+                </button>
+                <button onclick="switchSection('sendungen')" id="nav-sendungen" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-slate-400 hover:bg-slate-700 hover:text-white transition">
+                    <span>📦</span>
+                    <span>Meine Sendungen</span>
+                </button>
+                <button onclick="switchSection('streitfall')" id="nav-streitfall" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-slate-400 hover:bg-slate-700 hover:text-white transition">
+                    <span>⚖️</span>
+                    <span>Streitfall öffnen</span>
+                </button>
+                <button onclick="switchSection('tarif')" id="nav-tarif" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-slate-400 hover:bg-slate-700 hover:text-white transition">
+                    <span>⭐</span>
+                    <span>Tarif & Account</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Кнопка выхода из аккаунта -->
+        <div class="p-4 border-t border-slate-700">
+            <a href="/logout" class="w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg bg-rose-600/20 text-rose-400 hover:bg-rose-600 hover:text-white transition text-sm font-medium">
+                <span>Abmelden</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Основной контент -->
+    <main class="flex-1 flex flex-col min-h-screen overflow-y-auto">
+        <header class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex justify-between items-center md:justify-end">
+            <span class="text-sm md:hidden text-indigo-400 font-bold">PackProof</span>
+            <div class="flex items-center space-x-4">
+                <span class="text-xs bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full font-medium">Rolle: {{ role }}</span>
+            </div>
+        </header>
+
+        <div class="p-6 md:p-10 max-w-5xl w-full mx-auto flex-1">
+
+            <!-- Вкладка 1: Видео-запись (На переход в inspection.html) -->
+            <section id="section-aufnahme" class="space-y-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Paket-Inspektion & Aufnahme</h2>
+                    <p class="text-sm text-slate-400 mt-1">Starten Sie die verifizierte Aufzeichnung für Ihre Sendung.</p>
+                </div>
+
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl space-y-4">
+                    <div class="p-4 bg-slate-900 rounded-lg border border-slate-700 flex justify-between items-center">
+                        <div>
+                            <p class="font-medium text-white">Vollständige Paket-Inspektion (Hauptmodus)</p>
+                            <p class="text-xs text-slate-400 mt-0.5">Inkl. Tracking-Nummer, Timelapse-Einstellung & PDF/QR-Berichten.</p>
+                        </div>
+                        <!-- Кнопка перенаправляет на твой файл со всей мощной логикой -->
+                        <a href="/inspection" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-lg font-medium transition shadow-md inline-block text-center">
+                            Inspektion starten →
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Вкладка 2: Мои отправления -->
+            <section id="section-sendungen" class="space-y-6 hidden">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Meine Sendungen & Videos</h2>
+                    <p class="text-sm text-slate-400 mt-1">Historie aller gespeicherten und verifizierten Inspektionen.</p>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl">
+                    <div class="p-4 bg-slate-900 rounded-lg border border-slate-700 flex justify-between items-center">
+                        <div>
+                            <p class="font-medium text-white">Sendung #DHL-9842103 (Munkerstraße 15)</p>
+                            <p class="text-xs text-slate-400 mt-0.5">Datum: Verifiziert | Status: Gesichert</p>
+                        </div>
+                        <span class="text-xs bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full font-medium">Gespeichert</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Вкладка 3: Открыть спор -->
+            <section id="section-streitfall" class="space-y-6 hidden">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Streitfall / Reklamation öffnen</h2>
+                    <p class="text-sm text-slate-400 mt-1">Reichen Sie Beweise ein, falls die Ware beschädigt ankam oder fehlt.</p>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1">Sendungsnummer (Tracking-ID)</label>
+                        <input type="text" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500" placeholder="z.B. DHL...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1">Beschreibung</label>
+                        <textarea rows="3" class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500" placeholder="Problem beschreiben..."></textarea>
+                    </div>
+                    <button onclick="alert('Beschwerde eingereicht!')" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-lg transition">Absenden</button>
+                </div>
+            </section>
+
+            <!-- Вкладка 4: Тариф -->
+            <section id="section-tarif" class="space-y-6 hidden">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Tarif & Mitgliedschaft</h2>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl flex justify-between items-center">
+                    <div>
+                        <p class="text-lg font-bold text-indigo-400">Kostenloser Plan (Free)</p>
+                    </div>
+                    <button onclick="alert('Upgrade folgt')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-lg font-medium transition">Upgrade</button>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        function switchSection(sectionId) {
+            const sections = ['aufnahme', 'sendungen', 'streitfall', 'tarif'];
+            sections.forEach(id => {
+                const sec = document.getElementById('section-' + id);
+                const nav = document.getElementById('nav-' + id);
+                if (id === sectionId) {
+                    sec.classList.remove('hidden');
+                    nav.classList.add('bg-indigo-600', 'text-white');
+                    nav.classList.remove('text-slate-400', 'hover:bg-slate-700', 'hover:text-white');
+                } else {
+                    sec.classList.add('hidden');
+                    nav.classList.remove('bg-indigo-600', 'text-white');
+                    nav.classList.add('text-slate-400', 'hover:bg-slate-700', 'hover:text-white');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
