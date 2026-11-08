@@ -13,7 +13,7 @@ def hash_password(password):
 
 @app.route('/')
 def home():
-    return redirect(url_for('login_page'))
+    return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login_page():
