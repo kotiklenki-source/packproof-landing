@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" translate="no">
 <head>
     <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PackProof Inspection — Visuelle Verpackungssicherung</title>
     <style>
@@ -42,14 +43,14 @@
 
         .nav-right { display: flex; gap: 12px; align-items: center; }
 
-        .btn-app {
-            background: var(--ppi-green); color: #fff; padding: 8px 16px;
+        .btn-verify-nav {
+            background: transparent; border: 1px solid #475569; color: #e2e8f0; padding: 8px 14px;
             border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;
         }
 
-        .lang-select {
-            background: #334155; border: 1px solid #475569; color: #fff;
-            padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; cursor: pointer;
+        .btn-app {
+            background: var(--ppi-green); color: #fff; padding: 8px 16px;
+            border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;
         }
 
         .hero {
@@ -67,7 +68,6 @@
         .hero h1 { font-size: 2.3rem; color: var(--accent); margin-bottom: 16px; }
         .hero p { font-size: 1.1rem; color: var(--subtext); line-height: 1.6; margin-bottom: 32px; }
 
-        /* ИНТЕРАКТИВНЫЕ 3 КОЛОНКИ */
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -86,34 +86,17 @@
             padding: 24px;
             text-align: center;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
         }
 
-        /* Эффект увеличения и подсветки при наведении мышкой */
         .feature-card:hover {
             transform: translateY(-8px) scale(1.02);
             border-color: var(--accent);
             box-shadow: 0 12px 30px -10px rgba(56, 189, 248, 0.3);
-            background: #1e293b;
         }
 
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 12px;
-        }
-
-        .feature-card h3 {
-            margin: 0 0 8px 0;
-            color: var(--accent);
-            font-size: 1.2rem;
-        }
-
-        .feature-card p {
-            margin: 0;
-            font-size: 0.9rem;
-            color: var(--subtext);
-            line-height: 1.5;
-        }
+        .feature-icon { font-size: 2.5rem; margin-bottom: 12px; }
+        .feature-card h3 { margin: 0 0 8px 0; color: var(--accent); font-size: 1.2rem; }
+        .feature-card p { margin: 0; font-size: 0.9rem; color: var(--subtext); line-height: 1.5; }
 
         footer {
             background: var(--card-bg); border-top: 1px solid #334155;
@@ -134,12 +117,8 @@
             </h1>
         </div>
         <div class="nav-right">
-            <select id="langSelect" class="lang-select">
-                <option value="de">DE</option>
-                <option value="en">EN</option>
-                <option value="ru">RU</option>
-            </select>
-            <a href="/app" class="btn-app" id="t-btn-app">🚀 App starten</a>
+            <a href="/verify" class="btn-verify-nav">🔍 Sendung prüfen</a>
+            <a href="/app" class="btn-app">🚀 App starten</a>
         </div>
     </nav>
 
@@ -147,29 +126,28 @@
         <div class="shield-icon-container">
             <span style="font-size: 2.5rem;">🛡️</span>
         </div>
-        <h1 id="t-hero-title">Visuelle Verpackungssicherung</h1>
-        <p id="t-hero-desc">
+        <h1>Visuelle Verpackungssicherung & Qualitätsnachweis</h1>
+        <p>
             PackProof Inspection ist die professionelle Komplettlösung für E-Commerce und Logistik. 
-            Sichern Sie Ihre Sendungen mit unmanipulierbaren Video-Nachweisen.
+            Sichern Sie Ihre Sendungen mit unmanipulierbaren SHA-256 Video-Nachweisen.
         </p>
     </main>
 
-    <!-- 3 ИНТЕРАКТИВНЫЕ КОЛОНКИ С АНИМАЦИЕЙ -->
     <section class="features-grid">
         <div class="feature-card">
             <div class="feature-icon">📹</div>
-            <h3 id="f1-title">Video-Verpackungsnachweis</h3>
-            <p id="f1-desc">Lückenlose Aufzeichnung des Verpackungsprozesses im Time-Lapse- oder Standardmodus.</p>
+            <h3>Video-Verpackungsnachweis</h3>
+            <p>Lückenlose Aufzeichnung des Verpackungsprozesses im Time-Lapse- oder Standardmodus.</p>
         </div>
         <div class="feature-card">
             <div class="feature-icon">🔒</div>
-            <h3 id="f2-title">Zweiseitiges Unboxing</h3>
-            <p id="f2-desc">Sichere Käufer-Authentifizierung per PIN-Code für fälschungssichere Auspack-Videos.</p>
+            <h3>Zweiseitiges Unboxing</h3>
+            <p>Sichere Käufer-Authentifizierung per PIN-Code mit genau einer geschützten Aufnahme-Chance.</p>
         </div>
         <div class="feature-card">
             <div class="feature-icon">📜</div>
-            <h3 id="f3-title">Prüfbericht & Zertifikat</h3>
-            <p id="f3-desc">Krypto-Prüfbericht mit SHA-256 Hash zur schnellen Klärung bei Transportschäden.</p>
+            <h3>Prüfbericht & Zertifikat</h3>
+            <p>Krypto-Prüfbericht mit SHA-256 Hash und 14-Tage-Frist zur schnellen Klärung bei Streitfällen.</p>
         </div>
     </section>
 
@@ -180,72 +158,6 @@
             <a href="/datenschutz.html">Datenschutzerklärung</a>
         </div>
     </footer>
-
-<script>
-    const i18n = {
-        de: {
-            btnApp: "🚀 App starten",
-            heroTitle: "Visuelle Verpackungssicherung & Qualitätsnachweis",
-            heroDesc: "PackProof Inspection ist die professionelle Komplettlösung für E-Commerce und Logistik. Sichern Sie Ihre Sendungen mit unmanipulierbaren Video-Nachweisen.",
-            f1Title: "Video-Verpackungsnachweis",
-            f1Desc: "Lückenlose Aufzeichnung des Verpackungsprozesses im Time-Lapse- oder Standardmodus.",
-            f2Title: "Zweiseitiges Unboxing",
-            f2Desc: "Sichere Käufer-Authentifizierung per PIN-Code für fälschungssichere Auspack-Videos.",
-            f3Title: "Prüfbericht & Zertifikat",
-            f3Desc: "Krypto-Prüfbericht mit SHA-256 Hash zur schnellen Klärung bei Transportschäden."
-        },
-        en: {
-            btnApp: "🚀 Launch App",
-            heroTitle: "Visual Packing Verification & Proof System",
-            heroDesc: "PackProof Inspection is the professional all-in-one solution for e-commerce and logistics. Secure your shipments with tamper-proof video evidence.",
-            f1Title: "Packing Video Proof",
-            f1Desc: "Seamless recording of the packing process in Time-Lapse or Standard 1x mode.",
-            f2Title: "Two-Way Unboxing",
-            f2Desc: "Secure buyer authentication via PIN code for tamper-proof unboxing recordings.",
-            f3Title: "Audit Report Certificate",
-            f3Desc: "Cryptographic audit report with SHA-256 hash for fast dispute resolution."
-        },
-        ru: {
-            btnApp: "🚀 Открыть приложение",
-            heroTitle: "Визуальная фиксация упаковки и контроль качества",
-            heroDesc: "PackProof Inspection — профессиональное решение для e-commerce и логистики. Защитите отправки видеодоказательствами.",
-            f1Title: "Видеофиксация упаковки",
-            f1Desc: "Запись процесса упаковки товара в ускоренном (Таймлапс) или обычном режиме.",
-            f2Title: "Двусторонняя распаковка",
-            f2Desc: "Авторизация покупателя по ПИН-коду для записи ответного видео распаковки.",
-            f3Title: "Аудиторский отчёт PDF",
-            f3Desc: "Криптографический сертификат с SHA-256 хэшем для решения спорных ситуаций."
-        }
-    };
-
-    const langSelect = document.getElementById('langSelect');
-
-    function setLanguage(lang) {
-        const t = i18n[lang];
-        document.getElementById('t-btn-app').textContent = t.btnApp;
-        document.getElementById('t-hero-title').textContent = t.heroTitle;
-        document.getElementById('t-hero-desc').textContent = t.heroDesc;
-        document.getElementById('f1-title').textContent = t.f1Title;
-        document.getElementById('f1-desc').textContent = t.f1Desc;
-        document.getElementById('f2-title').textContent = t.f2Title;
-        document.getElementById('f2-desc').textContent = t.f2Desc;
-        document.getElementById('f3-title').textContent = t.f3Title;
-        document.getElementById('f3-desc').textContent = t.f3Desc;
-    }
-
-    function detectLanguage() {
-        const userLang = navigator.language || navigator.userLanguage;
-        if (userLang.startsWith('ru') || userLang.startsWith('uk')) return 'ru';
-        if (userLang.startsWith('en')) return 'en';
-        return 'de';
-    }
-
-    langSelect.addEventListener('change', (e) => setLanguage(e.target.value));
-
-    const initialLang = detectLanguage();
-    langSelect.value = initialLang;
-    setLanguage(initialLang);
-</script>
 
 </body>
 </html>

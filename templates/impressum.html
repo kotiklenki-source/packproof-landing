@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" translate="no">
 <head>
     <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Impressum — PackProof Inspection</title>
     <style>
@@ -26,22 +27,63 @@
             padding: 16px 24px;
             display: flex; justify-content: space-between; align-items: center;
         }
+        .logo-group { display: flex; align-items: center; gap: 10px; }
+        .ppi-badge {
+            background: rgba(34, 197, 94, 0.15); border: 1px solid var(--ppi-green);
+            color: var(--ppi-green); font-weight: 900; font-size: 0.8rem;
+            padding: 4px 8px; border-radius: 6px;
+        }
         .logo-text { font-size: 1.35rem; font-weight: 700; margin: 0; }
         .logo-text a { color: var(--accent); text-decoration: none; }
         .btn-back {
             background: #334155; color: #fff; padding: 8px 16px;
             border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;
+            border: 1px solid #475569;
             transition: background 0.2s;
         }
         .btn-back:hover { background: #475569; }
         .content {
-            max-width: 800px; margin: 40px auto; padding: 30px;
+            max-width: 820px; margin: 36px auto; padding: 32px;
             background: var(--card-bg); border: 1px solid #334155;
-            border-radius: 12px; line-height: 1.6;
+            border-radius: 16px; line-height: 1.65;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45);
         }
-        h1 { color: var(--accent); margin-top: 0; }
-        h2 { font-size: 1.2rem; color: #e2e8f0; margin-top: 24px; }
-        p, li { color: var(--subtext); }
+        .doc-header {
+            border-bottom: 1px solid #334155;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+        h1 { color: var(--accent); margin: 0; font-size: 1.75rem; }
+        .meta-badge {
+            background: rgba(34, 197, 94, 0.12);
+            border: 1px solid rgba(34, 197, 94, 0.35);
+            color: var(--ppi-green);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+        h2 {
+            font-size: 1.15rem;
+            color: #e2e8f0;
+            margin-top: 26px;
+            padding-left: 10px;
+            border-left: 3px solid var(--accent);
+        }
+        p { color: var(--subtext); font-size: 0.95rem; }
+        strong { color: #e2e8f0; }
+        .info-box {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin: 12px 0;
+        }
         footer {
             background: var(--card-bg); border-top: 1px solid #334155;
             padding: 20px; text-align: center; font-size: 0.85rem; color: var(--subtext);
@@ -53,36 +95,53 @@
 <body>
 
     <nav class="navbar">
-        <h1 class="logo-text"><a href="/">PackProof Inspection</a></h1>
+        <div class="logo-group">
+            <span class="ppi-badge">PPI</span>
+            <h1 class="logo-text"><a href="/">PackProof Inspection</a></h1>
+        </div>
         <a href="/" class="btn-back">← Zurück zur Startseite</a>
     </nav>
 
     <main class="content">
-        <h1>Impressum</h1>
-        
-        <h2>Angaben gemäß § 5 TMG</h2>
-        <p>
-            Yevhenii Banko<br>
-            Munkerstraße 15<br>
-            95445 Bayreuth<br>
-            Deutschland
-        </p>
+        <div class="doc-header">
+            <h1>Impressum</h1>
+            <span class="meta-badge">Angaben gemäß § 5 DDG / TMG</span>
+        </div>
+
+        <h2>Betreiber & Anbieter</h2>
+        <div class="info-box">
+            <p style="margin:0;">
+                <strong>Yevhenii Banko</strong><br>
+                PackProof Inspection<br>
+                Munkerstraße 15<br>
+                95445 Bayreuth<br>
+                Deutschland
+            </p>
+        </div>
 
         <h2>Kontakt</h2>
         <p>
-            E-Mail: support@packproof.de
+            Telefon: +49 170 1130805<br>
+            E-Mail: <a href="mailto:support@packproof.de" style="color:var(--accent); text-decoration:none;">support@packproof.de</a>
         </p>
 
-        <h2>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
+        <h2>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h2>
         <p>
             Yevhenii Banko<br>
             Munkerstraße 15<br>
             95445 Bayreuth
         </p>
+
+        <h2>EU-Streitschlichtung & Verbraucherstreitbeilegung</h2>
+        <p>
+            Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:
+            <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener" style="color:var(--accent);">https://ec.europa.eu/consumers/odr/</a>.
+            Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
+        </p>
     </main>
 
     <footer>
-        <div>© PackProof Inspection System. Alle Rechte vorbehalten.</div>
+        <div>© 2026 PackProof Inspection System. Alle Rechte vorbehalten.</div>
         <div style="margin-top: 8px;">
             <a href="/impressum.html">Impressum</a> | 
             <a href="/datenschutz.html">Datenschutzerklärung</a>

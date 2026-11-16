@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" translate="no">
 <head>
     <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PackProof Inspektion</title>
+    <title>PackProof Inspektion — Verpackungsnachweis</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -75,16 +76,6 @@
             font-weight: 600;
         }
 
-        .lang-select {
-            background: #334155;
-            border: 1px solid #475569;
-            color: #fff;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-
         .subtitle { margin: -8px 0 0 0; font-size: 0.85rem; color: var(--subtext); }
 
         details.instruction-box {
@@ -110,7 +101,7 @@
         canvas { display: none; }
 
         .rec-overlay {
-            position: absolute; top: 12px; left: 12px; background: rgba(0, 0, 0, 0.7); color: #fff;
+            position: absolute; top: 12px; left: 12px; background: rgba(0, 0, 0, 0.75); color: #fff;
             padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700;
             display: none; align-items: center; gap: 8px; z-index: 10;
         }
@@ -123,13 +114,13 @@
         .btn-start { background: var(--accent); color: #000; }
         .btn-stop { background: var(--danger); color: #fff; }
         .btn-upload { background: var(--ppi-green); color: #fff; }
-        .btn-upload:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-upload:disabled, .btn-start:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-secondary { background: #334155; color: #fff; border: 1px solid #475569; }
         .btn-client { background: #0284c7; color: #fff; }
 
-        .status { font-size: 0.875rem; text-align: center; padding: 8px; border-radius: 6px; display: none; }
-        .status.error { background: rgba(239, 68, 68, 0.2); color: #f87171; display: block; }
-        .status.success { background: rgba(34, 197, 94, 0.2); color: #4ade80; display: block; }
+        .status { font-size: 0.875rem; text-align: center; padding: 10px; border-radius: 6px; display: none; }
+        .status.error { background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; display: block; }
+        .status.success { background: rgba(34, 197, 94, 0.2); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; display: block; }
 
         .qr-section { text-align: center; display: none; flex-direction: column; align-items: center; gap: 12px; }
         .qr-box { position: relative; background: #fff; padding: 10px; border-radius: 12px; display: inline-block; }
@@ -158,41 +149,37 @@
             <span class="ppi-badge">PPI</span>
             <div class="header"><h1><a href="/" title="PackProof Inspection">PackProof Inspection</a></h1></div>
         </div>
-        <div style="display:flex; gap:8px;">
-            <a href="/" id="btnHome" class="btn-home">Startseite</a>
-            <select id="langSelect" class="lang-select">
-                <option value="de">DE</option>
-                <option value="en">EN</option>
-                <option value="ru">RU</option>
-            </select>
+        <div style="display:flex; gap:8px; align-items:center;">
+            <a href="/app" class="btn-home">Dashboard</a>
+            <span style="font-size:0.75rem; color:var(--subtext); font-weight:700; border:1px solid #334155; padding:4px 8px; border-radius:6px;">DE</span>
         </div>
     </div>
-    <p class="subtitle" id="t-subtitle">Visuelle Verpackungssicherung & Qualitätsnachweis</p>
+    <p class="subtitle">Visuelle Verpackungssicherung & kryptografischer Qualitätsnachweis</p>
 
     <details class="instruction-box">
-        <summary id="t-guide-title">ℹ️ Kurzanleitung</summary>
+        <summary>ℹ️ Kurzanleitung</summary>
         <div class="instruction-content">
-            <ol id="t-guide-steps">
-                <li>Geben Sie die <b>Sendungsnummer / ID</b> ein.</li>
-                <li>Wählen Sie den <b>Aufnahmemodus</b> (Time-Lapse oder Standard).</li>
-                <li>Klicken Sie auf <b>"Aufnahme starten"</b> und verpacken Sie die Ware.</li>
-                <li>Klicken Sie auf <b>"Hochladen & Verifizieren"</b> um den QR-Code zu erstellen.</li>
+            <ol>
+                <li>Geben Sie die eindeutige <b>Sendungsnummer / Tracking-ID</b> ein.</li>
+                <li>Wählen Sie den <b>Aufnahmemodus</b> (Time-Lapse oder Standard 1x).</li>
+                <li>Klicken Sie auf <b>„Aufnahme starten“</b> und verpacken Sie die Ware vollständig sichtbar vor der Kamera.</li>
+                <li>Klicken Sie auf <b>„Hochladen & Versiegeln“</b>, um den SHA-256 Nachweis, QR-Code und Käufer-PIN zu erstellen.</li>
             </ol>
         </div>
     </details>
 
     <div class="input-group">
-        <label id="t-label-id" for="trackingId">Sendungsnummer / ID:</label>
-        <input type="text" id="trackingId" placeholder="z. B. DE123456789">
+        <label for="trackingId">Sendungsnummer / Tracking-ID:</label>
+        <input type="text" id="trackingId" placeholder="z. B. DE123456789" required>
     </div>
 
     <div class="input-group">
-        <label id="t-label-mode" for="modeSelect">Aufnahmemodus:</label>
+        <label for="modeSelect">Aufnahmemodus:</label>
         <select id="modeSelect">
-            <option value="timelapse" id="t-opt-timelapse">⚡ Time-Lapse (Schnell, ideal für Verpackung)</option>
-            <option value="standard" id="t-opt-standard">📹 Standard Video 1x (Für hohe Details)</option>
+            <option value="timelapse">⚡ Time-Lapse (Schnell, ideal für Verpackung)</option>
+            <option value="standard">📹 Standard Video 1x (Für hohe Details)</option>
         </select>
-        <div id="modeHint" class="mode-hint"></div>
+        <div id="modeHint" class="mode-hint">Time-Lapse: Erfasst alle 0,5 Sek. ein Bild (15x Beschleunigung, minimale Dateigröße).</div>
     </div>
 
     <div class="video-wrapper">
@@ -205,14 +192,14 @@
     </div>
 
     <div class="controls">
-        <button id="recordBtn" class="btn-start">Aufnahme starten</button>
-        <button id="uploadBtn" class="btn-upload" disabled>Hochladen & Verifizieren</button>
+        <button id="recordBtn" class="btn-start">🔴 Aufnahme starten</button>
+        <button id="uploadBtn" class="btn-upload" disabled>🔒 Hochladen & Versiegeln</button>
     </div>
 
     <div id="statusMsg" class="status"></div>
 
     <div id="qrSection" class="qr-section">
-        <h3 id="t-qr-title">Bestätigungs-QR-Code & PIN:</h3>
+        <h3 style="margin:0;">Bestätigungs-QR-Code & Käufer-PIN:</h3>
         
         <div class="qr-box">
             <img id="qrImage" src="" alt="QR Code">
@@ -220,114 +207,22 @@
         </div>
 
         <div class="pin-card">
-            <div style="font-size:0.8rem; color:var(--subtext);" id="t-pin-title">Sicherheits-PIN für Käufer (Unboxing):</div>
+            <div style="font-size:0.8rem; color:var(--subtext);">Sicherheits-PIN für Käufer (Unboxing):</div>
             <div id="generatedPin" class="pin-code">--------</div>
-            <div style="font-size:0.75rem; color:var(--subtext);" id="t-pin-desc">Diesen PIN per Nachricht an den Käufer senden!</div>
+            <div style="font-size:0.75rem; color:var(--subtext);">Diesen PIN sicher an den Käufer übermitteln!</div>
         </div>
 
         <div class="export-group">
             <button id="downloadQrBtn" class="btn-secondary">🏷️ QR-Etikett herunterladen (Druck auf Verpackung)</button>
-            <button id="downloadCardBtn" class="btn-client">✉️ Kundenkarte herunterladen (Bild für eBay/WhatsApp)</button>
+            <button id="downloadCardBtn" class="btn-client">✉️ Kundenkarte herunterladen (Bild für eBay / WhatsApp)</button>
+            <a id="openReportLink" href="#" target="_blank" class="btn-home" style="text-align:center; padding:12px;">📋 Prüfbericht & Video ansehen →</a>
         </div>
 
-        <button onclick="resetForm()" id="t-next-btn" class="btn-start" style="width:100%; margin-top:6px;">Nächstes Video aufnehmen</button>
+        <button onclick="resetForm()" class="btn-start" style="width:100%; margin-top:6px;">+ Nächstes Paket aufnehmen</button>
     </div>
 </div>
 
 <script>
-    const i18n = {
-        de: {
-            btnHome: "Startseite",
-            subtitle: "Visuelle Verpackungssicherung & Qualitätsnachweis",
-            guideTitle: "ℹ️ Kurzanleitung",
-            guideSteps: `
-                <li>Geben Sie die <b>Sendungsnummer / ID</b> ein.</li>
-                <li>Wählen Sie den <b>Aufnahmemodus</b> (Time-Lapse oder Standard).</li>
-                <li>Klicken Sie auf <b>"Aufnahme starten"</b> und verpacken Sie die Ware.</li>
-                <li>Klicken Sie auf <b>"Hochladen & Verifizieren"</b> um den QR-Code zu erstellen.</li>
-            `,
-            labelId: "Sendungsnummer / ID:",
-            labelMode: "Aufnahmemodus:",
-            optTimelapse: "⚡ Time-Lapse (Schnell, ideal für Verpackung)",
-            optStandard: "📹 Standard Video 1x (Für hohe Details)",
-            hintTimelapse: "Time-Lapse: Erfasst alle 0,5 Sek. ein Bild (15x Beschleunigung, minimale Dateigröße).",
-            hintStandard: "Standard 1x: Normale Videoaufnahme in Echtzeit für maximale Detailgenauigkeit.",
-            btnStart: "Aufnahme starten",
-            btnStop: "Aufnahme stoppen",
-            btnUpload: "Hochladen & Verifizieren",
-            qrTitle: "Bestätigungs-QR-Code & PIN:",
-            pinTitle: "Sicherheits-PIN für Käufer (Unboxing):",
-            pinDesc: "Diesen PIN per Nachricht an den Käufer senden!",
-            btnDownloadQr: "🏷️ QR-Etikett herunterladen (Druck auf Verpackung)",
-            btnDownloadCard: "✉️ Kundenkarte herunterladen (Bild für eBay/WhatsApp)",
-            btnNext: "Nächstes Video aufnehmen",
-            msgRecording: "Aufnahme läuft...",
-            msgReady: "Aufnahme bereit zum Hochladen.",
-            msgUploading: "Wird hochgeladen...",
-            msgSuccess: "Erfolgreich hochgeladen!"
-        },
-        en: {
-            btnHome: "Home",
-            subtitle: "Visual Packing Verification & Proof System",
-            guideTitle: "ℹ️ User Guide",
-            guideSteps: `
-                <li>Enter the <b>Tracking ID / Order Number</b>.</li>
-                <li>Select the <b>Recording Mode</b> (Time-Lapse or Standard).</li>
-                <li>Click <b>"Start Recording"</b> and pack the item.</li>
-                <li>Click <b>"Upload & Verify"</b> to generate the QR code.</li>
-            `,
-            labelId: "Tracking ID / Order Number:",
-            labelMode: "Recording Mode:",
-            optTimelapse: "⚡ Time-Lapse (Fast, ideal for packing)",
-            optStandard: "📹 Standard Video 1x (For fine details)",
-            hintTimelapse: "Time-Lapse: Captures frame every 0.5s (15x speed, minimal file size).",
-            hintStandard: "Standard 1x: Real-time normal video recording for maximum detail.",
-            btnStart: "Start Recording",
-            btnStop: "Stop Recording",
-            btnUpload: "Upload & Verify",
-            qrTitle: "Verification QR Code & PIN:",
-            pinTitle: "Security PIN for Buyer (Unboxing):",
-            pinDesc: "Send this PIN to the buyer via message!",
-            btnDownloadQr: "🏷️ Download Package Label (For Box Print)",
-            btnDownloadCard: "✉️ Download Buyer Card (Image for eBay/WhatsApp)",
-            btnNext: "Record Next Video",
-            msgRecording: "Recording in progress...",
-            msgReady: "Recording ready for upload.",
-            msgUploading: "Uploading...",
-            msgSuccess: "Uploaded successfully!"
-        },
-        ru: {
-            btnHome: "Главная",
-            subtitle: "Визуальная фиксация упаковки и контроль качества",
-            guideTitle: "ℹ️ Инструкция",
-            guideSteps: `
-                <li>Введите <b>Трек-номер / ID заказа</b>.</li>
-                <li>Выберите <b>Режим записи</b> (Таймлапс или Обычное видео).</li>
-                <li>Нажмите <b>"Начать запись"</b> и упакуйте товар.</li>
-                <li>Нажмите <b>"Загрузить и проверить"</b> для создания QR-кода.</li>
-            `,
-            labelId: "Трек-номер / ID заказа:",
-            labelMode: "Режим записи:",
-            optTimelapse: "⚡ Таймлапс (Быстро, идеально для упаковки)",
-            optStandard: "📹 Обычное видео 1x (Для мелких деталей)",
-            hintTimelapse: "Таймлапс: Съемка 1 кадра каждые 0.5 сек (ускорение 15x, минимальный размер).",
-            hintStandard: "Обычное 1x: Запись видео в реальном времени с максимальной детализацией.",
-            btnStart: "Начать запись",
-            btnStop: "Остановить запись",
-            btnUpload: "Загрузить и проверить",
-            qrTitle: "QR-код и PIN для покупателя:",
-            pinTitle: "ПИН-код безопасности покупателя (Распаковка):",
-            pinDesc: "Отправьте этот ПИН-код покупателю в сообщении!",
-            btnDownloadQr: "🏷️ Скачать этикетку (Печать на упаковку)",
-            btnDownloadCard: "✉️ Скачать открытку клиенту (Картинка для eBay/WhatsApp)",
-            btnNext: "Записать следующее видео",
-            msgRecording: "Идет запись...",
-            msgReady: "Запись готова к загрузке.",
-            msgUploading: "Загрузка на сервер...",
-            msgSuccess: "Успешно загружено!"
-        }
-    };
-
     const preview = document.getElementById('preview');
     const recordCanvas = document.getElementById('recordCanvas');
     const ctx = recordCanvas.getContext('2d');
@@ -342,47 +237,27 @@
     const trackingInput = document.getElementById('trackingId');
     const modeSelect = document.getElementById('modeSelect');
     const modeHint = document.getElementById('modeHint');
-    const langSelect = document.getElementById('langSelect');
     const recOverlay = document.getElementById('recOverlay');
     const recText = document.getElementById('recText');
-    const btnHome = document.getElementById('btnHome');
 
-    let stream = null, mediaRecorder = null, recordedChunks = [], isRecording = false, lapseInterval = null, timerInterval = null, secondsRecorded = 0, currentLang = 'de';
+    let stream = null;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let isRecording = false;
+    let lapseInterval = null;
+    let timerInterval = null;
+    let secondsRecorded = 0;
+    let currentPin = "";
+    let lastTrackingId = "";
 
-    function setLanguage(lang) {
-        currentLang = lang;
-        const t = i18n[lang];
-        btnHome.textContent = t.btnHome;
-        document.getElementById('t-subtitle').textContent = t.subtitle;
-        document.getElementById('t-guide-title').textContent = t.guideTitle;
-        document.getElementById('t-guide-steps').innerHTML = t.guideSteps;
-        document.getElementById('t-label-id').textContent = t.labelId;
-        document.getElementById('t-label-mode').textContent = t.labelMode;
-        document.getElementById('t-opt-timelapse').textContent = t.optTimelapse;
-        document.getElementById('t-opt-standard').textContent = t.optStandard;
-        document.getElementById('t-qr-title').textContent = t.qrTitle;
-        document.getElementById('t-pin-title').textContent = t.pinTitle;
-        document.getElementById('t-pin-desc').textContent = t.pinDesc;
-        downloadQrBtn.textContent = t.btnDownloadQr;
-        downloadCardBtn.textContent = t.btnDownloadCard;
-        document.getElementById('t-next-btn').textContent = t.btnNext;
-        
-        recordBtn.textContent = isRecording ? t.btnStop : t.btnStart;
-        uploadBtn.textContent = t.btnUpload;
-        updateModeHint();
-    }
-
-    function updateModeHint() {
-        const t = i18n[currentLang];
-        modeHint.textContent = modeSelect.value === 'timelapse' ? t.hintTimelapse : t.hintStandard;
-    }
-
-    langSelect.addEventListener('change', e => setLanguage(e.target.value));
-    modeSelect.addEventListener('change', updateModeHint);
+    modeSelect.addEventListener('change', () => {
+        modeHint.textContent = modeSelect.value === 'timelapse'
+            ? "Time-Lapse: Erfasst alle 0,5 Sek. ein Bild (15x Beschleunigung, minimale Dateigröße)."
+            : "Standard 1x: Normale Videoaufnahme in Echtzeit für maximale Detailgenauigkeit.";
+    });
 
     async function initCamera() {
         try {
-            // Пробуем запустить заднюю камеру
             stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: { ideal: "environment" } }, 
                 audio: false 
@@ -390,11 +265,10 @@
             preview.srcObject = stream;
         } catch (err) {
             try {
-                // Если нет задней (например, на веб-камере ПК), берём любую доступную
                 stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
                 preview.srcObject = stream;
             } catch (fallbackErr) {
-                showStatus("Kamera-Zugriff error: " + fallbackErr.message, true);
+                showStatus("Kamera-Zugriff fehlgeschlagen: " + fallbackErr.message, true);
             }
         }
     }
@@ -404,15 +278,28 @@
     }
 
     initCamera();
-    setLanguage('de');
 
     recordBtn.addEventListener('click', () => {
-        if (!isRecording) startRecording(); else stopRecording();
+        if (!isRecording) {
+            if (!trackingInput.value.trim()) {
+                showStatus("Bitte geben Sie zuerst eine Sendungsnummer / Tracking-ID ein!", true);
+                trackingInput.focus();
+                return;
+            }
+            startRecording();
+        } else {
+            stopRecording();
+        }
     });
 
     function startRecording() {
+        if (!stream) {
+            showStatus("Keine Kamera verfügbar.", true);
+            return;
+        }
         recordedChunks = [];
         secondsRecorded = 0;
+
         if (modeSelect.value === 'timelapse') {
             const settings = stream.getVideoTracks()[0].getSettings();
             recordCanvas.width = settings.width || 640;
@@ -423,18 +310,21 @@
         } else {
             mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
         }
+
         mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
         mediaRecorder.start();
         isRecording = true;
 
+        trackingInput.disabled = true;
+        modeSelect.disabled = true;
         recOverlay.style.display = 'flex';
         updateTimerDisplay();
         timerInterval = setInterval(() => { secondsRecorded++; updateTimerDisplay(); }, 1000);
 
-        recordBtn.textContent = i18n[currentLang].btnStop;
+        recordBtn.textContent = "⏹️ Aufnahme stoppen";
         recordBtn.className = "btn-stop";
         uploadBtn.disabled = true;
-        showStatus(i18n[currentLang].msgRecording, false);
+        showStatus("Aufnahme läuft...", false);
     }
 
     function updateTimerDisplay() {
@@ -450,17 +340,22 @@
         mediaRecorder.stop();
         isRecording = false;
 
-        recordBtn.textContent = i18n[currentLang].btnStart;
+        trackingInput.disabled = false;
+        modeSelect.disabled = false;
+        recordBtn.textContent = "🔴 Neu aufnehmen";
         recordBtn.className = "btn-start";
         uploadBtn.disabled = false;
-        showStatus(i18n[currentLang].msgReady, false);
+        showStatus("Aufnahme bereit zum Hochladen & Versiegeln.", false);
     }
 
-    let currentPin = "";
-    let lastTrackingId = "";
-
     uploadBtn.addEventListener('click', async () => {
-        lastTrackingId = trackingInput.value.trim() || "ID_" + Date.now();
+        const cleanId = trackingInput.value.trim();
+        if (!cleanId) {
+            showStatus("Bitte geben Sie eine gültige Sendungsnummer ein!", true);
+            return;
+        }
+
+        lastTrackingId = cleanId;
         currentPin = generate8DigitPin();
 
         const blob = new Blob(recordedChunks, { type: 'video/webm' });
@@ -470,24 +365,29 @@
         formData.append("secret_pin", currentPin);
 
         uploadBtn.disabled = true;
-        showStatus(i18n[currentLang].msgUploading, false);
+        recordBtn.disabled = true;
+        showStatus("Video wird hochgeladen & SHA-256 Hash berechnet...", false);
 
         try {
             const res = await fetch("/api/upload", { method: "POST", body: formData });
-            if (!res.ok) throw new Error();
             const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.detail || "Fehler beim Hochladen.");
+            }
 
             qrImage.src = `/api/qr/${encodeURIComponent(data.tracking_id)}`;
             generatedPin.textContent = currentPin;
+            document.getElementById('openReportLink').href = `/report/${encodeURIComponent(data.tracking_id)}`;
             qrSection.style.display = 'flex';
-            showStatus(i18n[currentLang].msgSuccess, false);
+            showStatus("✅ Erfolgreich hochgeladen & kryptografisch versiegelt!", false);
         } catch (err) {
-            showStatus("Upload Error", true);
+            showStatus(err.message || "Upload-Fehler", true);
             uploadBtn.disabled = false;
+            recordBtn.disabled = false;
         }
     });
 
-    // Функция врисовки бейджа PPI в центр QR
     function drawPpiCenter(cx, x, y, size) {
         cx.fillStyle = "#0f172a";
         cx.fillRect(x - size/2, y - size/2, size, size);
@@ -502,7 +402,6 @@
         cx.fillText("PPI", x, y);
     }
 
-    // 1. Скачать наклейку на коробку (с врисованным логотипом PPI)
     downloadQrBtn.addEventListener('click', () => {
         if (!qrImage.src) return;
         const img = new Image();
@@ -517,7 +416,6 @@
             cx.fillRect(0, 0, 300, 300);
             cx.drawImage(img, 10, 10, 280, 280);
 
-            // Отрисовка PPI в центре скачиваемого QR
             drawPpiCenter(cx, 150, 150, 36);
 
             const a = document.createElement('a');
@@ -527,7 +425,6 @@
         };
     });
 
-    // 2. Скачать открытку клиенту для eBay/WhatsApp
     downloadCardBtn.addEventListener('click', () => {
         if (!qrImage.src) return;
 
@@ -563,13 +460,11 @@
             cx.fill();
 
             cx.drawImage(img, 185, 140, 230, 230);
-
-            // Отрисовка логотипа PPI в центре QR
             drawPpiCenter(cx, 300, 255, 42);
 
             cx.fillStyle = "#cbd5e1";
             cx.font = "16px monospace";
-            const linkText = `https://packproofinspection.com/verify?id=${lastTrackingId}`;
+            const linkText = `${window.location.origin}/verify?id=${lastTrackingId}`;
             cx.fillText(linkText, 300, 420);
 
             cx.fillStyle = "#1e293b";
@@ -590,8 +485,8 @@
 
             cx.fillStyle = "#64748b";
             cx.font = "14px sans-serif";
-            cx.fillText("Scannen Sie den QR-Code oder nutzen Sie den Link.", 300, 650);
-            cx.fillText("Verwenden Sie den PIN, um Ihr Unboxing-Video aufzunehmen.", 300, 675);
+            cx.fillText("Scannen Sie den QR-Code oder öffnen Sie den Link.", 300, 650);
+            cx.fillText("Sie haben genau 1 Aufnahme-Chance für das Unboxing.", 300, 675);
 
             const a = document.createElement('a');
             a.href = c.toDataURL('image/png');
@@ -608,8 +503,11 @@
     function resetForm() {
         qrSection.style.display = 'none';
         uploadBtn.disabled = true;
+        recordBtn.disabled = false;
+        recordBtn.textContent = "🔴 Aufnahme starten";
         trackingInput.value = '';
         statusMsg.style.display = 'none';
+        recordedChunks = [];
     }
 </script>
 

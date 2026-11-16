@@ -5,3 +5,8 @@ qrcode
 pillow
 boto3
 requests
+jinja2
+sqlalchemy
+psycopg[binary]
+itsdangerous
+bcrypt

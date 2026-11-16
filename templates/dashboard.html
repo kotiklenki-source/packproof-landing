@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PackProof - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex">
+
+    <!-- Боковая панель навигации (Sidebar) -->
+    <aside class="w-64 bg-slate-800 border-r border-slate-700 flex flex-col justify-between hidden md:flex">
+        <div>
+            <div class="p-6 border-b border-slate-700">
+                <a href="/" class="text-2xl font-extrabold tracking-wider text-indigo-400">PackProof</a>
+                <p class="text-xs text-slate-400 mt-1">Angemeldet als: <span class="text-slate-200 font-medium">{{ email }}</span></p>
+            </div>
+
+            <nav class="p-4 space-y-2">
+                <button onclick="switchSection('aufnahme')" id="nav-aufnahme" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium transition">
+                    <span>📹</span>
+                    <span>Video-Aufnahme</span>
+                </button>
+                <button onclick="switchSection('sendungen')" id="nav-sendungen" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-slate-400 hover:bg-slate-700 hover:text-white transition">
+                    <span>📦</span>
+                    <span>Meine Sendungen ({{ inspections|length }})</span>
+                </button>
+                <button onclick="switchSection('streitfall')" id="nav-streitfall" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-slate-400 hover:bg-slate-700 hover:text-white transition">
+                    <span>⚖️</span>
+                    <span>Streitfall öffnen</span>
+                </button>
+                <button onclick="switchSection('tarif')" id="nav-tarif" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-slate-400 hover:bg-slate-700 hover:text-white transition">
+                    <span>⭐</span>
+                    <span>Tarif & Account</span>
+                </button>
+
+                {% if is_admin %}
+                <div class="pt-4 mt-4 border-t border-slate-700">
+                    <a href="/admin" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 font-medium transition">
+                        <span>🛡️</span>
+                        <span>Admin-Panel</span>
+                    </a>
+                </div>
+                {% endif %}
+            </nav>
+        </div>
+
+        <!-- Кнопка выхода из аккаунта -->
+        <div class="p-4 border-t border-slate-700">
+            <a href="/logout" class="w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg bg-rose-600/20 text-rose-400 hover:bg-rose-600 hover:text-white transition text-sm font-medium">
+                <span>Abmelden</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Основной контент -->
+    <main class="flex-1 flex flex-col min-h-screen overflow-y-auto">
+        <header class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex justify-between items-center md:justify-end">
+            <a href="/" class="text-sm md:hidden text-indigo-400 font-bold">PackProof</a>
+            <div class="flex items-center space-x-3">
+                <span class="text-xs bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1 rounded-full font-medium">Rolle: {{ role }}</span>
+                <a href="/logout" class="md:hidden text-xs bg-rose-600/20 text-rose-400 px-3 py-1 rounded-full">Logout</a>
+            </div>
+        </header>
+
+        <div class="p-6 md:p-10 max-w-5xl w-full mx-auto flex-1">
+
+            <!-- Вкладка 1: Видео-запись -->
+            <section id="section-aufnahme" class="space-y-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Paket-Inspektion & Aufnahme</h2>
+                    <p class="text-sm text-slate-400 mt-1">Starten Sie die verifizierte Aufzeichnung für Ihre Sendung.</p>
+                </div>
+
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl space-y-4">
+                    <div class="p-4 bg-slate-900 rounded-lg border border-slate-700 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                        <div>
+                            <p class="font-medium text-white">Vollständige Paket-Inspektion (Hauptmodus)</p>
+                            <p class="text-xs text-slate-400 mt-0.5">Inkl. Tracking-Nummer, Timelapse-Einstellung, Käufer-PIN & QR-Bericht.</p>
+                        </div>
+                        <a href="/inspection" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-lg font-medium transition shadow-md inline-block text-center shrink-0">
+                            Inspektion starten →
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Вкладка 2: Мои отправления (Реальные данные из БД) -->
+            <section id="section-sendungen" class="space-y-6 hidden">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Meine Sendungen & Videos</h2>
+                        <p class="text-sm text-slate-400 mt-1">Historie aller gespeicherten und verifizierten Inspektionen.</p>
+                    </div>
+                    <a href="/inspection" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm px-4 py-2 rounded-lg font-medium transition">+ Neue Aufnahme</a>
+                </div>
+
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl space-y-3">
+                    {% for item in inspections %}
+                    <div class="p-4 bg-slate-900 rounded-lg border border-slate-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <p class="font-mono font-bold text-white text-base">#{{ item.tracking_id }}</p>
+                                {% if item.status == 'verified' %}
+                                    <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full font-medium">Verifiziert</span>
+                                {% elif item.status == 'unboxed' %}
+                                    <span class="text-xs bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2.5 py-0.5 rounded-full font-medium">Unboxing abgeschlossen</span>
+                                {% elif item.status == 'disputed' %}
+                                {% elif item.status == 'unboxing_started' %}
+    <span class="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-0.5 rounded-full font-medium">Unboxing unterbrochen</span>
+                                    <span class="text-xs bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2.5 py-0.5 rounded-full font-medium">Streitfall</span>
+                                {% endif %}
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1">
+                                Datum: {{ item.created_at.strftime('%d.%m.%Y %H:%M') }} | Käufer-PIN: <span class="text-emerald-400 font-mono font-bold">{{ item.secret_pin }}</span>
+                            </p>
+                        </div>
+
+                        <div class="flex items-center gap-2 shrink-0">
+                            <a href="/report/{{ item.tracking_id }}" target="_blank" class="text-xs bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white px-3 py-2 rounded-lg transition">
+                                📜 Bericht & Video
+                            </a>
+                            <a href="/api/qr/{{ item.tracking_id }}" download="QR_{{ item.tracking_id }}.png" class="text-xs bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 px-3 py-2 rounded-lg transition">
+                                🏷️ QR
+                            </a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-8 text-slate-400">
+                        <p class="mb-3">Sie haben noch keine Sendungen aufgezeichnet.</p>
+                        <a href="/inspection" class="text-indigo-400 hover:underline text-sm font-medium">Erste Paket-Inspektion starten →</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Вкладка 3: Открыть спор -->
+            <section id="section-streitfall" class="space-y-6 hidden">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Streitfall / Reklamation öffnen</h2>
+                    <p class="text-sm text-slate-400 mt-1">Reichen Sie Beweise ein, falls die Ware beschädigt ankam oder fehlt.</p>
+                </div>
+                <form action="/api/dispute" method="POST" class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1">Sendungsnummer (Tracking-ID)</label>
+                        <input type="text" name="tracking_id" required class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500" placeholder="z.B. DE123456789">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1">Beschreibung des Problems</label>
+                        <textarea name="description" rows="3" required class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-indigo-500" placeholder="Problem beschreiben..."></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-medium py-2.5 rounded-lg transition">Streitfall melden</button>
+                </form>
+            </section>
+
+            <!-- Вкладка 4: Тариф -->
+            <section id="section-tarif" class="space-y-6 hidden">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Tarif & Mitgliedschaft</h2>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-xl flex justify-between items-center">
+                    <div>
+                        <p class="text-lg font-bold text-indigo-400">Aktueller Plan: {{ role }}</p>
+                        <p class="text-xs text-slate-400 mt-1">Inklusive SHA-256 Video-Verifizierung und Käufer-PIN.</p>
+                    </div>
+                    <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-4 py-2 rounded-lg text-sm font-medium">Aktiv</span>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        function switchSection(sectionId) {
+            const sections = ['aufnahme', 'sendungen', 'streitfall', 'tarif'];
+            sections.forEach(id => {
+                const sec = document.getElementById('section-' + id);
+                const nav = document.getElementById('nav-' + id);
+                if (id === sectionId) {
+                    sec.classList.remove('hidden');
+                    nav.classList.add('bg-indigo-600', 'text-white');
+                    nav.classList.remove('text-slate-400', 'hover:bg-slate-700', 'hover:text-white');
+                } else {
+                    sec.classList.add('hidden');
+                    nav.classList.remove('bg-indigo-600', 'text-white');
+                    nav.classList.add('text-slate-400', 'hover:bg-slate-700', 'hover:text-white');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

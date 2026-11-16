@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" translate="no">
 <head>
     <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PackProof — Prüfbericht & Verifikation</title>
     <style>
@@ -12,6 +13,7 @@
             --ppi-green: #22c55e;
             --text-color: #f8fafc;
             --danger: #ef4444;
+            --warning: #f59e0b;
             --subtext: #94a3b8;
         }
 
@@ -44,23 +46,112 @@
         .ppi-badge { background: rgba(34, 197, 94, 0.15); border: 1px solid var(--ppi-green); color: var(--ppi-green); font-weight: 900; font-size: 0.75rem; padding: 3px 7px; border-radius: 6px; }
         .header h1 { margin: 0; font-size: 1.35rem; }
         .header h1 a { color: var(--accent); text-decoration: none; }
-        .lang-select { background: #334155; border: 1px solid #475569; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
 
         .status-badge { background: rgba(34, 197, 94, 0.15); border: 1px solid var(--ppi-green); color: #4ade80; padding: 10px; border-radius: 8px; font-weight: 600; text-align: center; }
+        .status-disputed { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: #fca5a5; }
+        .status-warning { background: rgba(245, 158, 11, 0.15); border: 1px solid var(--warning); color: #fde68a; }
+
         .video-box { width: 100%; aspect-ratio: 4/3; background: #000; border-radius: 12px; overflow: hidden; }
         video { width: 100%; height: 100%; object-fit: cover; }
 
         .info-card { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
-        .info-row { display: flex; justify-content: space-between; color: var(--subtext); }
-        .info-row span.val { color: #fff; font-weight: 600; word-break: break-all; }
+        .info-row { display: flex; justify-content: space-between; color: var(--subtext); gap: 12px; }
+        .info-row span.val { color: #fff; font-weight: 600; word-break: break-all; text-align: right; }
 
-        .unboxing-section { background: #0f172a; border: 1px dashed var(--accent); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px; text-align: center; }
-        input { background: #334155; border: 1px solid #475569; color: #fff; padding: 10px; border-radius: 6px; outline: none; }
+        .unboxing-section { background: #0f172a; border: 1px dashed var(--accent); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 12px; text-align: center; }
+        input[type="password"], input[type="text"], textarea {
+            background: #334155;
+            border: 1px solid #475569;
+            color: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            outline: none;
+            font-size: 0.9rem;
+            font-family: inherit;
+            width: 100%;
+            box-sizing: border-box;
+        }
 
-        button { padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        button { padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.95rem; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-primary { background: var(--accent); color: #000; }
         .btn-success { background: var(--ppi-green); color: #fff; }
-        .btn-outline { background: transparent; border: 1px solid #475569; color: #fff; }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-warning { background: var(--warning); color: #000; }
+        .btn-outline { background: transparent; border: 1px solid #475569; color: #fff; text-align: center; }
+
+        .one-attempt-warning {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            border-left: 4px solid var(--danger);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: left;
+            font-size: 0.82rem;
+            color: #fecaca;
+            line-height: 1.45;
+        }
+        .one-attempt-warning strong {
+            color: #fff;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.88rem;
+        }
+
+        .net-status-bar {
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .net-online { background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.4); color: #86efac; }
+        .net-offline { background: rgba(245, 158, 11, 0.16); border: 1px solid var(--warning); color: #fde68a; }
+
+        .confirm-box {
+            background: #1e293b;
+            border: 1px solid #475569;
+            border-radius: 10px;
+            padding: 14px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.82rem;
+            color: #e2e8f0;
+            line-height: 1.4;
+            cursor: pointer;
+        }
+        .checkbox-label input { margin-top: 3px; accent-color: var(--ppi-green); }
+
+        .dispute-panel {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid var(--danger);
+            border-radius: 10px;
+            padding: 14px;
+            text-align: left;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .legal-notice {
+            background: rgba(245, 158, 11, 0.12);
+            border-left: 3px solid var(--warning);
+            padding: 8px 10px;
+            font-size: 0.78rem;
+            color: #fde68a;
+            line-height: 1.4;
+        }
 
         .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 100; padding: 20px; }
         .modal-card { background: var(--card-bg); border-radius: 16px; padding: 24px; max-width: 400px; width: 100%; text-align: center; border: 1px solid var(--ppi-green); display: flex; flex-direction: column; gap: 14px; }
@@ -70,7 +161,7 @@
         @media print {
             body { background: #fff !important; color: #000 !important; padding: 0; margin: 0; }
             .container { box-shadow: none !important; border: none !important; max-width: 100% !important; padding: 10px !important; }
-            button, .unboxing-section, .lang-select, .video-box, .modal-overlay { display: none !important; }
+            button, .unboxing-section, .video-box, .modal-overlay { display: none !important; }
             .print-only { display: block !important; }
             
             .pdf-header { border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 16px; text-align: center; }
@@ -79,9 +170,9 @@
 
             .pdf-block { border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 12px; background: #f8fafc; }
             .pdf-block h4 { margin: 0 0 8px 0; color: #0f172a; font-size: 14px; }
-            .pdf-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; }
+            .pdf-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; gap: 8px; }
             .pdf-row .label { color: #475569; }
-            .pdf-row .value { font-weight: bold; color: #0f172a; font-family: monospace; }
+            .pdf-row .value { font-weight: bold; color: #0f172a; font-family: monospace; word-break: break-all; text-align: right; }
 
             .pdf-verdict { border: 2px solid #22c55e; background: #f0fdf4; border-radius: 8px; padding: 12px; text-align: center; margin-top: 16px; }
             .pdf-verdict-title { font-weight: bold; color: #166534; font-size: 14px; }
@@ -99,195 +190,320 @@
                 <h1><a href="/" title="PackProof Inspection">PackProof Inspection</a></h1>
             </div>
         </div>
-        <select id="langSelect" class="lang-select">
-            <option value="de">DE</option>
-            <option value="en">EN</option>
-            <option value="ru">RU</option>
-        </select>
+        <span style="font-size:0.75rem; color:var(--subtext); font-weight:700; border:1px solid #334155; padding:4px 8px; border-radius:6px;">DE</span>
     </div>
 
-    <div id="loading" style="text-align:center;">Verifizierung läuft...</div>
+    <div id="loading" style="text-align:center; padding: 20px 0;">Verifizierung läuft...</div>
+
+    <div id="manualSearchBox" style="display:none; flex-direction:column; gap:10px; text-align:center;">
+        <p style="margin:0; font-size:0.9rem; color:var(--subtext);">Bitte geben Sie Ihre Sendungs-ID ein, um den Nachweis zu prüfen:</p>
+        <input type="text" id="manualTrackingInput" placeholder="z. B. DE123456789">
+        <button onclick="goToTracking()" class="btn-primary">🔍 Sendung prüfen</button>
+    </div>
 
     <div id="content" style="display:none; flex-direction:column; gap:16px;">
         
         <div class="print-only pdf-header">
-            <div class="pdf-title">PackProof Inspection — Official Audit Certificate</div>
-            <div class="pdf-subtitle">Zweiseitiger Verpackungs- & Auspacknachweis</div>
+            <div class="pdf-title">PackProof Inspection — Offizielles Prüfprotokoll</div>
+            <div class="pdf-subtitle">Zweiseitiger Verpackungs- & Auspacknachweis (SHA-256)</div>
         </div>
 
-        <div class="status-badge" id="t-status">✅ Verifiziert & Gesichert</div>
+        <div class="status-badge" id="mainStatusBadge">✅ Verifiziert & Kryptografisch Gesichert</div>
 
-        <h3 id="t-seller-title">📦 Verpackung durch Verkäufer:</h3>
+        <h3 style="margin:0; font-size:1rem;">📦 Verpackung durch Verkäufer:</h3>
         <div class="video-box">
             <video id="videoPlayer" controls playsinline></video>
         </div>
 
         <div class="info-card">
-            <div class="info-row"><span id="t-label-id">Sendungs-ID:</span><span class="val" id="dispTrackingId">-</span></div>
-            <div class="info-row"><span>SHA-256 Hash:</span><span class="val" id="dispHash" style="font-size:0.75rem;">-</span></div>
-            <div class="info-row"><span>Status:</span><span class="val" style="color:#22c55e;" id="t-val-status">Original unverändert</span></div>
+            <div class="info-row"><span>Sendungs-ID:</span><span class="val" id="dispTrackingId">-</span></div>
+            <div class="info-row"><span>Packing SHA-256:</span><span class="val" id="dispHash" style="font-size:0.75rem;">-</span></div>
+            <div class="info-row" id="unboxingHashRow" style="display:none;"><span>Unboxing SHA-256:</span><span class="val" id="dispUnboxingHash" style="font-size:0.75rem;">-</span></div>
+            <div class="info-row"><span>Integritätsstatus:</span><span class="val" id="dispIntegrity" style="color:#22c55e;">Original unverändert</span></div>
         </div>
 
-        <!-- PDF Блок Продавца -->
+        <!-- PDF-Block Verkäufer -->
         <div class="print-only pdf-block">
-            <h4 id="t-pdf-seller-head">📦 Verkäufer-Nachweis (Packing Proof)</h4>
+            <h4>📦 Verkäufer-Nachweis (Packing Proof)</h4>
             <div class="pdf-row"><span class="label">Status:</span><span class="value" style="color:#166534;">VERIFIED & HASHED</span></div>
             <div class="pdf-row"><span class="label">SHA-256 Hash:</span><span class="value" id="pdfSellerHash">-</span></div>
-            <div class="pdf-row"><span class="label">Cloud Storage:</span><span class="value">Encrypted Cloudflare R2 Store</span></div>
+            <div class="pdf-row"><span class="label">Speicherort:</span><span class="value">PackProof Cloud Vault</span></div>
         </div>
 
-        <div id="unboxingDisplay" style="display:none;" class="video-box">
-            <h3 id="t-buyer-title">🎁 Auspacken durch Käufer:</h3>
-            <video id="unboxingPlayer" controls playsinline></video>
+        <div id="unboxingDisplay" style="display:none; flex-direction:column; gap:8px;">
+            <h3 style="margin:0; font-size:1rem;" id="unboxingDisplayTitle">🎁 Auspacken durch Käufer:</h3>
+            <div class="video-box">
+                <video id="unboxingPlayer" controls playsinline></video>
+            </div>
         </div>
 
-        <!-- PDF Блок Покупателя -->
+        <!-- PDF-Block Käufer -->
         <div class="print-only pdf-block" id="pdfBuyerBlock">
-            <h4 id="t-pdf-buyer-head">🎁 Käufer-Nachweis (Unboxing Proof)</h4>
-            <div class="pdf-row"><span class="label">Unboxing Status:</span><span class="value" id="pdfBuyerStatus" style="color:#166534;">WAITING FOR UNBOXING</span></div>
-            <div class="pdf-row"><span class="label">System Audit:</span><span class="value" id="pdfBuyerAudit">PIN Authentication Pending</span></div>
+            <h4>🎁 Käufer-Nachweis (Unboxing Proof)</h4>
+            <div class="pdf-row"><span class="label">Unboxing-Status:</span><span class="value" id="pdfBuyerStatus" style="color:#166534;">AUSSTEHEND</span></div>
+            <div class="pdf-row"><span class="label">Unboxing SHA-256:</span><span class="value" id="pdfBuyerHash">-</span></div>
+            <div class="pdf-row"><span class="label">System-Audit:</span><span class="value" id="pdfBuyerAudit">PIN-Verifizierung ausstehend</span></div>
         </div>
 
         <div class="print-only pdf-verdict">
-            <div class="pdf-verdict-title" id="t-pdf-verdict-title">⚖️ PACKPROOF AUDIT ZERTIFIZIERT</div>
-            <div class="pdf-verdict-desc" id="t-pdf-verdict-desc">Dieses Dokument bestätigt die unveränderliche Speicherung der Videodaten im PackProof-Register.</div>
+            <div class="pdf-verdict-title">⚖️ PACKPROOF AUDIT ZERTIFIZIERT</div>
+            <div class="pdf-verdict-desc">Dieses Dokument bestätigt die unveränderliche Speicherung der Videodaten im PackProof-Register.</div>
         </div>
 
+        <!-- Блок восстановления прерванной загрузки из памяти телефона (IndexedDB) -->
+        <div class="unboxing-section" id="resumeUploadBox" style="display:none; border-color:var(--warning);">
+            <h4 style="margin:0; color:#fde68a;">📤 Unterbrochene Aufnahme gefunden!</h4>
+            <p style="margin:0; font-size:0.82rem; color:#e2e8f0; line-height:1.4;">
+                Ihre vorherige Aufnahme wurde lokal auf diesem Gerät gesichert, aber durch einen Verbindungsabbruch noch nicht vollständig versiegelt. Sie können die vorhandenen Videodaten jetzt ohne Neuaufnahme fertig hochladen:
+            </p>
+            <input type="password" id="resumePinInput" placeholder="Sicherheits-PIN zur Fortsetzung eingeben">
+            <button id="resumeBtn" onclick="resumeInterruptedUpload()" class="btn-warning">🚀 Gesicherte Aufnahme jetzt fertig hochladen</button>
+        </div>
+
+        <!-- 1. Ввод PIN-кода + Жёсткое предупреждение об одной попытке -->
         <div class="unboxing-section" id="buyerAuthBox">
-            <h4 style="margin:0;" id="t-auth-title">🔒 Käufer-Authentifizierung</h4>
-            <p style="margin:0; font-size:0.8rem; color:var(--subtext);" id="t-auth-desc">Geben Sie den PIN-Code aus Ihrer Sendung ein, um das Auspack-Video aufzunehmen:</p>
-            <input type="password" id="pinInput" placeholder="PIN-Code (z. B. 12345678)">
-            <button onclick="unlockUnboxing()" class="btn-primary" id="t-btn-auth">🔐 Kamera öffnen</button>
+            <h4 style="margin:0;">🔒 Käufer-Authentifizierung</h4>
+
+            <div class="one-attempt-warning">
+                <strong>⚠️ WICHTIGER HINWEIS: SIE HABEN GENAU EINE (1) AUFNAHME-CHANCE!</strong>
+                Versuchen Sie nicht, das System zu täuschen oder bereits geöffnete Pakete nachzustellen — jede Manipulation wird kryptografisch erkannt. Die Aufnahme wird alle 3 Sekunden live gesichert (bei Funkloch lokal zwischengespeichert). Nach dem Stoppen können Sie den einwandfreien Empfang bestätigen oder innerhalb von <strong>14 Tagen</strong> offiziell Reklamation einlegen.
+            </div>
+
+            <p style="margin:0; font-size:0.8rem; color:var(--subtext);">Geben Sie den Sicherheits-PIN aus Ihrer Sendung ein, um fortzufahren:</p>
+            <input type="password" id="pinInput" placeholder="Sicherheits-PIN (z. B. 12345678)">
+            <button onclick="unlockUnboxing()" class="btn-primary">🔐 Verstanden — Kamera öffnen</button>
         </div>
 
+        <!-- 2. Запись видео с индикатором сети -->
         <div class="unboxing-section" id="camRecorderBox" style="display:none;">
+            <div class="one-attempt-warning" style="margin-bottom:4px;">
+                <strong>🎥 Einmalige Beweisaufnahme bereit</strong>
+                Filmen Sie das ungeöffnete Paket inkl. Versandetikett und öffnen Sie es ohne Unterbrechung vor der Kamera. Ein zweiter Versuch ist technisch ausgeschlossen.
+            </div>
+            <div id="netStatusBar" class="net-status-bar net-online" style="display:none;">
+                <span id="netStatusText">🟢 Live-Sicherung aktiv</span>
+                <span id="chunkCounterText">0 Segmente gesichert</span>
+            </div>
             <video id="camPreview" autoplay muted playsinline style="width:100%; border-radius:8px;"></video>
-            <button id="recBtn" onclick="toggleUnboxingRec()" class="btn-primary">🔴 Aufnahme starten</button>
+            <button id="recBtn" onclick="toggleUnboxingRec()" class="btn-primary">🔴 Einmalige Aufnahme jetzt starten</button>
         </div>
 
-        <button onclick="window.print()" class="btn-outline" id="t-btn-pdf">📄 Prüfbericht als PDF drucken</button>
+        <!-- 3. Юридическое подтверждение перед отправкой -->
+        <div class="unboxing-section" id="confirmSubmitBox" style="display:none; border-style:solid; border-color:var(--ppi-green);">
+            <h4 style="margin:0; color:#fff;">⚖️ Empfangsbestätigung & Abschluss</h4>
+            <div id="syncProgressBanner" class="net-status-bar net-offline" style="display:none;">
+                <span id="syncProgressText">⏳ Restliche Videosegmente werden hochgeladen...</span>
+            </div>
+            <p style="margin:0; font-size:0.8rem; color:var(--subtext);">Ihre Aufnahme wurde erstellt. Wählen Sie nun verbindlich das Ergebnis für das Prüfprotokoll:</p>
+
+            <video id="recordedPreview" controls playsinline style="width:100%; border-radius:8px; background:#000;"></video>
+
+            <!-- Вариант А: Товар получен без нареканий -->
+            <div class="confirm-box" id="acceptPanel">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="acceptCheckbox">
+                    <span>Ich bestätige hiermit verbindlich, dass ich die Sendung vollständig und unversehrt erhalten habe. Mit dem Absenden wird das Video unveränderlich versiegelt.</span>
+                </label>
+                <button id="btnSubmitAccept" onclick="submitFinalVideo('accepted')" class="btn-success">✅ Alles in Ordnung — Ware erhalten & versiegeln</button>
+            </div>
+
+            <!-- Переключатель на жалобу -->
+            <button type="button" id="toggleDisputeBtn" onclick="showDisputePanel()" class="btn-outline" style="border-color:var(--danger); color:#fca5a5; font-size:0.85rem;">
+                ⚠️ Problem festgestellt? Reklamation / Einspruch einlegen
+            </button>
+
+            <!-- Вариант Б: Подача жалобы + правило 14 дней -->
+            <div class="dispute-panel" id="disputePanel">
+                <strong style="color:#fca5a5; font-size:0.9rem;">🚨 Reklamation / Streitfall eröffnen</strong>
+                <div class="legal-notice">
+                    <strong>Rechtlicher Hinweis (14-Tage-Frist):</strong> Sie haben ab Zustellung <strong>14 Tage Zeit</strong> für die offizielle Einspruchs- und Beschwerdeführung. Ihr Auspack-Video wird als unveränderliches Beweismittel angehängt.
+                </div>
+                <textarea id="disputeNoteInput" rows="3" placeholder="Beschreiben Sie den Mangel genau (z. B. Karton beschädigt, falscher Artikel, Inhalt fehlt)..."></textarea>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="disputeCheckbox">
+                    <span>Ich bestätige die Richtigkeit meiner Angaben und nehme zur Kenntnis, dass die Einspruchsfrist 14 Tage beträgt.</span>
+                </label>
+                <button id="btnSubmitDispute" onclick="submitFinalVideo('disputed')" class="btn-danger">🚨 Reklamation & Video verbindlich absenden</button>
+                <button type="button" onclick="hideDisputePanel()" class="btn-outline" style="font-size:0.8rem; padding:8px;">← Zurück zur normalen Empfangsbestätigung</button>
+            </div>
+        </div>
+
+        <button onclick="window.print()" class="btn-outline">📄 Prüfbericht als PDF drucken</button>
     </div>
 </div>
 
 <div class="modal-overlay" id="successModal">
-    <div class="modal-card">
-        <div style="font-size: 2.5rem;">🎉</div>
-        <h3 style="margin:0; color:var(--ppi-green);" id="t-modal-title">Unboxing-Video gespeichert!</h3>
-        <p style="margin:0; font-size:0.85rem; color:#cbd5e1;" id="t-modal-desc">Ihr Auspack-Video wurde erfolgreich mit der Sendung verknüpft. Der Prüfbericht ist nun vollständig.</p>
-        <button onclick="window.print()" class="btn-success" id="t-modal-btn-pdf">📄 Prüfbericht als PDF drucken</button>
-        <a href="/" class="btn-outline" style="text-decoration:none;" id="t-modal-btn-home">🏠 Zur Startseite</a>
+    <div class="modal-card" id="modalCard">
+        <div style="font-size: 2.5rem;" id="modalIcon">🎉</div>
+        <h3 style="margin:0; color:var(--ppi-green);" id="modalTitle">Unboxing-Video versiegelt!</h3>
+        <p style="margin:0; font-size:0.85rem; color:#cbd5e1;" id="modalDesc">Ihr Auspack-Video und Ihre Bestätigung wurden unveränderlich gespeichert. Der Prüfbericht ist nun vollständig.</p>
+        <a id="modalReportLink" href="#" class="btn-success" style="text-decoration:none; padding:12px; border-radius:8px; font-weight:600;">📋 Vollständigen Prüfbericht öffnen</a>
+        <button onclick="window.print()" class="btn-outline">📄 Als PDF drucken</button>
     </div>
 </div>
 
 <script>
-    const i18n = {
-        de: {
-            status: "✅ Verifiziert & Gesichert",
-            sellerTitle: "📦 Verpackung durch Verkäufer:",
-            buyerTitle: "🎁 Auspacken durch Käufer:",
-            labelId: "Sendungs-ID:",
-            authTitle: "🔒 Käufer-Authentifizierung",
-            authDesc: "Geben Sie den PIN-Code aus Ihrer Sendung ein, um das Auspack-Video aufzunehmen:",
-            btnAuth: "🔐 Kamera öffnen",
-            btnPdf: "📄 Prüfbericht als PDF drucken",
-            btnStartRec: "🔴 Auspacken aufnehmen",
-            btnStopRec: "⏹️ Stoppen & Hochladen",
-            errPin: "Falscher PIN-Code!",
-            modalTitle: "Unboxing-Video gespeichert!",
-            modalDesc: "Ihr Auspack-Video wurde erfolgreich verknüpft. Der Prüfbericht ist nun vollständig.",
-            modalBtnPdf: "📄 Prüfbericht als PDF drucken",
-            modalBtnHome: "🏠 Zur Startseite",
-            pdfSellerHead: "📦 Verkäufer-Nachweis (Packing Proof)",
-            pdfBuyerHead: "🎁 Käufer-Nachweis (Unboxing Proof)",
-            pdfVerdictTitle: "⚖️ PACKPROOF AUDIT ZERTIFIZIERT",
-            pdfVerdictDesc: "Dieses Dokument bestätigt die unveränderliche Speicherung im PackProof-Register."
-        },
-        en: {
-            status: "✅ Verified & Secured",
-            sellerTitle: "📦 Seller Packing Proof:",
-            buyerTitle: "🎁 Buyer Unboxing Proof:",
-            labelId: "Tracking ID:",
-            authTitle: "🔒 Buyer Authentication",
-            authDesc: "Enter the PIN code from your package to record unboxing video:",
-            btnAuth: "🔐 Open Camera",
-            btnPdf: "📄 Download PDF Audit Report",
-            btnStartRec: "🔴 Start Unboxing Record",
-            btnStopRec: "⏹️ Stop & Upload",
-            errPin: "Incorrect PIN Code!",
-            modalTitle: "Unboxing Video Saved!",
-            modalDesc: "Your unboxing video has been attached. The audit report is complete.",
-            modalBtnPdf: "📄 Print / Save PDF Report",
-            modalBtnHome: "🏠 Go to Homepage",
-            pdfSellerHead: "📦 Seller Packing Proof",
-            pdfBuyerHead: "🎁 Buyer Unboxing Proof",
-            pdfVerdictTitle: "⚖️ PACKPROOF AUDIT CERTIFIED",
-            pdfVerdictDesc: "This document certifies that both packing and unboxing video proofs are cryptographically secured."
-        },
-        ru: {
-            status: "✅ Подлинность подтверждена",
-            sellerTitle: "📦 Видео упаковки:",
-            buyerTitle: "🎁 Видео распаковки:",
-            labelId: "Трек-номер:",
-            authTitle: "🔒 Авторизация покупателя",
-            authDesc: "Введите ПИН-код из сообщения, чтобы записать видео распаковки:",
-            btnAuth: "🔐 Открыть камеру",
-            btnPdf: "📄 Сформировать отчёт PDF",
-            btnStartRec: "🔴 Начать запись распаковки",
-            btnStopRec: "⏹️ Остановить и выгрузить",
-            errPin: "Неверный ПИН-код!",
-            modalTitle: "Видео распаковки загружено!",
-            modalDesc: "Ваше видео успешно привязано к заказу. Двусторонний отчёт полностью сформирован.",
-            modalBtnPdf: "📄 Скачать отчёт PDF",
-            modalBtnHome: "🏠 На главную страницу",
-            pdfSellerHead: "📦 Доказательство упаковки (Продавец)",
-            pdfBuyerHead: "🎁 Доказательство распаковки (Покупатель)",
-            pdfVerdictTitle: "⚖️ АУДИТОРСКИЙ СЕРТИФИКАТ PACKPROOF",
-            pdfVerdictDesc: "Настоящий документ подтверждает фиксацию видеозаписей упаковки и распаковки в реестре PackProof."
-        }
-    };
-
     const urlParams = new URLSearchParams(window.location.search);
     const trackingId = urlParams.get('id');
-    const langSelect = document.getElementById('langSelect');
 
-    let stream = null, mediaRecorder = null, chunks = [], isRecording = false, currentLang = 'de', savedEnteredPin = "";
+    let stream = null;
+    let mediaRecorder = null;
+    let isRecording = false;
+    let savedEnteredPin = "";
+    let totalRecordedChunks = 0;
+    let serverConfirmedChunks = 0;
+    let isFlushingQueue = false;
+    let allLocalChunks = [];
 
-    function setLanguage(lang) {
-        currentLang = lang;
-        const t = i18n[lang];
-        document.getElementById('t-status').textContent = t.status;
-        document.getElementById('t-seller-title').textContent = t.sellerTitle;
-        document.getElementById('t-buyer-title').textContent = t.buyerTitle;
-        document.getElementById('t-label-id').textContent = t.labelId;
-        document.getElementById('t-auth-title').textContent = t.authTitle;
-        document.getElementById('t-auth-desc').textContent = t.authDesc;
-        document.getElementById('t-btn-auth').textContent = t.btnAuth;
-        document.getElementById('t-btn-pdf').textContent = t.btnPdf;
-
-        document.getElementById('t-modal-title').textContent = t.modalTitle;
-        document.getElementById('t-modal-desc').textContent = t.modalDesc;
-        document.getElementById('t-modal-btn-pdf').textContent = t.modalBtnPdf;
-        document.getElementById('t-modal-btn-home').textContent = t.modalBtnHome;
-
-        document.getElementById('t-pdf-seller-head').textContent = t.pdfSellerHead;
-        document.getElementById('t-pdf-buyer-head').textContent = t.pdfBuyerHead;
-        document.getElementById('t-pdf-verdict-title').textContent = t.pdfVerdictTitle;
-        document.getElementById('t-pdf-verdict-desc').textContent = t.pdfVerdictDesc;
+    // ==========================================
+    // IndexedDB для локального буфера на случай обрыва сети
+    // ==========================================
+    function openChunkDB() {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open("PackProofUnboxingDB", 1);
+            req.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains("chunks")) {
+                    db.createObjectStore("chunks", { keyPath: "key" });
+                }
+            };
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
     }
 
-    function detectLanguage() {
-        const userLang = navigator.language || navigator.userLanguage;
-        if (userLang.startsWith('ru') || userLang.startsWith('uk')) return 'ru';
-        if (userLang.startsWith('en')) return 'en';
-        return 'de';
+    async function saveChunkToDB(tid, index, blob) {
+        const db = await openChunkDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction("chunks", "readwrite");
+            tx.objectStore("chunks").put({ key: `${tid}_${index}`, tracking_id: tid, index: index, blob: blob });
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+        });
     }
 
-    langSelect.addEventListener('change', (e) => setLanguage(e.target.value));
+    async function getChunksFromDB(tid) {
+        const db = await openChunkDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction("chunks", "readonly");
+            const req = tx.objectStore("chunks").getAll();
+            req.onsuccess = () => {
+                const items = (req.result || [])
+                    .filter(item => item.tracking_id === tid)
+                    .sort((a, b) => a.index - b.index);
+                resolve(items);
+            };
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    async function clearChunksFromDB(tid) {
+        const items = await getChunksFromDB(tid);
+        if (!items.length) return;
+        const db = await openChunkDB();
+        return new Promise((resolve) => {
+            const tx = db.transaction("chunks", "readwrite");
+            const store = tx.objectStore("chunks");
+            items.forEach(item => store.delete(item.key));
+            tx.oncomplete = () => resolve();
+        });
+    }
+
+    // ==========================================
+    // Фоновая очередь отправки чанков (дозагрузка при появлении сети)
+    // ==========================================
+    function updateNetworkUI() {
+        const bar = document.getElementById('netStatusBar');
+        const text = document.getElementById('netStatusText');
+        const counter = document.getElementById('chunkCounterText');
+        if (!bar) return;
+
+        counter.textContent = `${serverConfirmedChunks} / ${totalRecordedChunks} Segmente gesichert`;
+
+        if (navigator.onLine && serverConfirmedChunks === totalRecordedChunks) {
+            bar.className = "net-status-bar net-online";
+            text.textContent = "🟢 Live-Sicherung aktiv";
+        } else if (!navigator.onLine) {
+            bar.className = "net-status-bar net-offline";
+            text.textContent = "⚠️ Keine Verbindung — Aufnahme läuft lokal weiter";
+        } else {
+            bar.className = "net-status-bar net-offline";
+            text.textContent = "⏳ Verbindung wiederhergestellt — lade Puffer hoch...";
+        }
+
+        const syncBanner = document.getElementById('syncProgressBanner');
+        const syncText = document.getElementById('syncProgressText');
+        if (syncBanner && document.getElementById('confirmSubmitBox').style.display === 'flex') {
+            if (serverConfirmedChunks < totalRecordedChunks) {
+                syncBanner.style.display = 'flex';
+                syncText.textContent = navigator.onLine
+                    ? `⏳ Lade restliche Segmente hoch (${serverConfirmedChunks}/${totalRecordedChunks})...`
+                    : `⚠️ Offline: ${totalRecordedChunks - serverConfirmedChunks} Segmente warten auf Internetverbindung...`;
+            } else {
+                syncBanner.style.display = 'none';
+            }
+        }
+    }
+
+    async function flushChunkQueue() {
+        if (isFlushingQueue || !savedEnteredPin || !trackingId) return;
+        if (!navigator.onLine) {
+            updateNetworkUI();
+            return;
+        }
+
+        isFlushingQueue = true;
+        try {
+            const stored = await getChunksFromDB(trackingId);
+            while (serverConfirmedChunks < stored.length) {
+                if (!navigator.onLine) break;
+                const item = stored[serverConfirmedChunks];
+                const fd = new FormData();
+                fd.append("tracking_id", trackingId);
+                fd.append("secret_pin", savedEnteredPin);
+                fd.append("chunk_index", String(item.index));
+                fd.append("file", item.blob, `chunk_${item.index}.webm`);
+
+                const res = await fetch("/api/upload-unboxing-chunk", { method: "POST", body: fd });
+                if (!res.ok) {
+                    break;
+                }
+                const data = await res.json();
+                serverConfirmedChunks = data.uploaded_chunks;
+                updateNetworkUI();
+            }
+        } catch (e) {
+            // Сеть оборвалась во время передачи — повторим автоматически при online
+        } finally {
+            isFlushingQueue = false;
+            updateNetworkUI();
+        }
+    }
+
+    window.addEventListener('online', () => {
+        updateNetworkUI();
+        flushChunkQueue();
+    });
+    window.addEventListener('offline', () => {
+        updateNetworkUI();
+    });
+
+    // ==========================================
+    // Инициализация страницы
+    // ==========================================
+    function goToTracking() {
+        const val = document.getElementById('manualTrackingInput').value.trim();
+        if (val) {
+            window.location.href = `/verify?id=${encodeURIComponent(val)}`;
+        }
+    }
 
     async function loadVerification() {
-        currentLang = detectLanguage();
-        langSelect.value = currentLang;
-        setLanguage(currentLang);
+        if (!trackingId) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('manualSearchBox').style.display = 'flex';
+            return;
+        }
 
         try {
             const res = await fetch(`/api/verify/${encodeURIComponent(trackingId)}`);
@@ -295,39 +511,109 @@
             const data = await res.json();
 
             document.getElementById('dispTrackingId').textContent = data.tracking_id;
-            document.getElementById('dispHash').textContent = data.sha256;
-            document.getElementById('pdfSellerHash').textContent = data.sha256;
+            document.getElementById('dispHash').textContent = data.sha256 || '-';
+            document.getElementById('pdfSellerHash').textContent = data.sha256 || '-';
             document.getElementById('videoPlayer').src = data.video_url;
+            document.getElementById('modalReportLink').href = `/report/${encodeURIComponent(data.tracking_id)}`;
+
+            const localSaved = await getChunksFromDB(trackingId);
+
+            if (data.status === "disputed") {
+                const badge = document.getElementById('mainStatusBadge');
+                badge.textContent = "⚠️ Streitfall / Reklamation gemeldet";
+                badge.classList.add('status-disputed');
+                document.getElementById('dispIntegrity').textContent = "Reklamation offen (14-Tage-Frist)";
+                document.getElementById('dispIntegrity').style.color = "#ef4444";
+            } else if (data.status === "unboxing_started" && !data.unboxing_video_url) {
+                document.getElementById('buyerAuthBox').style.display = 'none';
+                const badge = document.getElementById('mainStatusBadge');
+
+                if (localSaved.length > 0) {
+                    // В памяти этого телефона есть недогруженная запись — даём завершить без пересъёмки!
+                    badge.textContent = "⏳ Aufnahme unterbrochen — Bereit zur Fertigstellung";
+                    badge.classList.add('status-warning');
+                    serverConfirmedChunks = data.uploaded_chunks || 0;
+                    totalRecordedChunks = localSaved.length;
+                    document.getElementById('resumeUploadBox').style.display = 'flex';
+                } else {
+                    // На этом устройстве буфера нет, но часть видео уже долетела до сервера
+                    badge.textContent = "⛔ Einmalige Aufnahme wurde vorzeitig abgebrochen";
+                    badge.classList.add('status-disputed');
+                    document.getElementById('dispIntegrity').textContent = "Aufnahme unterbrochen (Teilbeweis gesichert)";
+                    document.getElementById('dispIntegrity').style.color = "#f59e0b";
+
+                    if (data.partial_video_url) {
+                        document.getElementById('unboxingDisplayTitle').textContent = "⚠️ Teilweise gesichertes Auspack-Video (bis Verbindungsabbruch):";
+                        document.getElementById('unboxingPlayer').src = data.partial_video_url;
+                        document.getElementById('unboxingDisplay').style.display = 'flex';
+                    }
+                }
+            }
 
             if (data.unboxing_video_url) {
+                await clearChunksFromDB(trackingId);
                 document.getElementById('unboxingPlayer').src = data.unboxing_video_url;
-                document.getElementById('unboxingDisplay').style.display = 'block';
+                document.getElementById('unboxingDisplay').style.display = 'flex';
                 document.getElementById('buyerAuthBox').style.display = 'none';
-                
-                // Статус после загрузки видео
-                document.getElementById('pdfBuyerStatus').textContent = "COMPLETE & VERIFIED";
-                document.getElementById('pdfBuyerAudit').textContent = "PIN Verified & Attached";
-            } else {
-                // Статус до загрузки видео
-                document.getElementById('pdfBuyerStatus').textContent = "WAITING FOR UNBOXING";
-                document.getElementById('pdfBuyerAudit').textContent = "PIN Authenticated Pending";
+                document.getElementById('resumeUploadBox').style.display = 'none';
+
+                if (data.unboxing_sha256) {
+                    document.getElementById('dispUnboxingHash').textContent = data.unboxing_sha256;
+                    document.getElementById('unboxingHashRow').style.display = 'flex';
+                    document.getElementById('pdfBuyerHash').textContent = data.unboxing_sha256;
+                }
+
+                document.getElementById('pdfBuyerStatus').textContent = data.status === "disputed" ? "REKLAMATION GEMELDET" : "VOLLSTÄNDIG & VERIFIZIERT";
+                document.getElementById('pdfBuyerAudit').textContent = "PIN verifiziert & Video versiegelt";
+            } else if (data.status !== "unboxing_started") {
+                document.getElementById('pdfBuyerStatus').textContent = "WARTET AUF AUSPACK-VIDEO";
+                document.getElementById('pdfBuyerAudit').textContent = "PIN-Authentifizierung ausstehend";
             }
 
             document.getElementById('loading').style.display = 'none';
             document.getElementById('content').style.display = 'flex';
         } catch (e) {
-            document.getElementById('loading').textContent = "⚠️ Nachweis nicht gefunden.";
+            document.getElementById('loading').textContent = "⚠️ Nachweis nicht gefunden. Bitte prüfen Sie die Sendungs-ID.";
+            document.getElementById('manualSearchBox').style.display = 'flex';
         }
+    }
+
+    // Возобновление дозагрузки после обрыва связи
+    async function resumeInterruptedUpload() {
+        const pin = document.getElementById('resumePinInput').value.trim();
+        if (!pin) return alert("Bitte geben Sie den Sicherheits-PIN ein!");
+
+        const btn = document.getElementById('resumeBtn');
+        btn.disabled = true;
+        btn.textContent = "⏳ Segmente werden übertragen...";
+
+        savedEnteredPin = pin;
+        const localSaved = await getChunksFromDB(trackingId);
+        totalRecordedChunks = localSaved.length;
+        allLocalChunks = localSaved.map(item => item.blob);
+
+        await flushChunkQueue();
+
+        if (serverConfirmedChunks < totalRecordedChunks) {
+            alert("Upload noch unvollständig. Bitte prüfen Sie Ihre Internetverbindung und klicken Sie erneut.");
+            btn.disabled = false;
+            btn.textContent = "🚀 Gesicherte Aufnahme jetzt fertig hochladen";
+            return;
+        }
+
+        const fullBlob = new Blob(allLocalChunks, { type: 'video/webm' });
+        document.getElementById('recordedPreview').src = URL.createObjectURL(fullBlob);
+        document.getElementById('resumeUploadBox').style.display = 'none';
+        document.getElementById('confirmSubmitBox').style.display = 'flex';
     }
 
     async function unlockUnboxing() {
         const pin = document.getElementById('pinInput').value.trim();
-        if (!pin) return alert(i18n[currentLang].errPin);
+        if (!pin) return alert("Bitte geben Sie den Sicherheits-PIN ein!");
 
         savedEnteredPin = pin;
 
         try {
-            // Включаем ЗАДНЮЮ камеру на телефоне покупателя
             stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: { ideal: "environment" } }, 
                 audio: true 
@@ -337,7 +623,6 @@
             document.getElementById('camRecorderBox').style.display = 'flex';
         } catch (e) {
             try {
-                // Запасной вариант если задняя недоступна
                 stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 document.getElementById('camPreview').srcObject = stream;
                 document.getElementById('buyerAuthBox').style.display = 'none';
@@ -348,43 +633,140 @@
         }
     }
 
-    function toggleUnboxingRec() {
+    async function toggleUnboxingRec() {
         const btn = document.getElementById('recBtn');
-        const t = i18n[currentLang];
 
         if (!isRecording) {
-            chunks = [];
+            btn.disabled = true;
+            btn.textContent = "Verbindung wird gesichert...";
+
+            const lockData = new FormData();
+            lockData.append("tracking_id", trackingId);
+            lockData.append("secret_pin", savedEnteredPin);
+
+            const lockRes = await fetch("/api/start-unboxing", { method: "POST", body: lockData });
+            if (!lockRes.ok) {
+                const err = await lockRes.json();
+                alert(err.detail || "Falscher PIN oder Aufnahme bereits verbraucht!");
+                if (stream) stream.getTracks().forEach(t => t.stop());
+                document.getElementById('camRecorderBox').style.display = 'none';
+                document.getElementById('buyerAuthBox').style.display = 'flex';
+                btn.disabled = false;
+                btn.textContent = "🔴 Einmalige Aufnahme jetzt starten";
+                return;
+            }
+
+            await clearChunksFromDB(trackingId);
+            allLocalChunks = [];
+            totalRecordedChunks = 0;
+            serverConfirmedChunks = 0;
+
+            document.getElementById('netStatusBar').style.display = 'flex';
+            updateNetworkUI();
+
             mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
-            mediaRecorder.ondataavailable = e => chunks.push(e.data);
-            mediaRecorder.start();
+
+            mediaRecorder.ondataavailable = async (e) => {
+                if (e.data && e.data.size > 0) {
+                    const idx = totalRecordedChunks++;
+                    allLocalChunks.push(e.data);
+                    await saveChunkToDB(trackingId, idx, e.data);
+                    updateNetworkUI();
+                    flushChunkQueue();
+                }
+            };
+
+            mediaRecorder.onstop = async () => {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                const fullBlob = new Blob(allLocalChunks, { type: 'video/webm' });
+                document.getElementById('recordedPreview').src = URL.createObjectURL(fullBlob);
+                document.getElementById('camRecorderBox').style.display = 'none';
+                document.getElementById('confirmSubmitBox').style.display = 'flex';
+                updateNetworkUI();
+                await flushChunkQueue();
+            };
+
+            // Нарезаем и отправляем сегменты каждые 3 секунды
+            mediaRecorder.start(3000);
             isRecording = true;
-            btn.textContent = t.btnStopRec;
+            btn.disabled = false;
+            btn.textContent = "⏹️ Aufnahme beenden & prüfen";
             btn.className = "btn-success";
         } else {
             mediaRecorder.stop();
             isRecording = false;
-            btn.textContent = "...";
-            btn.disabled = true;
+        }
+    }
 
-            setTimeout(async () => {
-                const blob = new Blob(chunks, { type: 'video/webm' });
-                const formData = new FormData();
-                formData.append("file", blob, `unboxing_${trackingId}.webm`);
-                formData.append("tracking_id", trackingId);
-                formData.append("pin", savedEnteredPin);
+    function showDisputePanel() {
+        document.getElementById('acceptPanel').style.display = 'none';
+        document.getElementById('toggleDisputeBtn').style.display = 'none';
+        document.getElementById('disputePanel').style.display = 'flex';
+    }
 
-                const res = await fetch("/api/upload-unboxing", { method: "POST", body: formData });
-                if (res.ok) {
-                    document.getElementById('pdfBuyerStatus').textContent = "COMPLETE & VERIFIED";
-                    document.getElementById('pdfBuyerAudit').textContent = "PIN Verified & Attached";
-                    document.getElementById('successModal').style.display = 'flex';
-                } else {
-                    const err = await res.json();
-                    alert(err.detail || t.errPin);
-                    btn.disabled = false;
-                    btn.textContent = t.btnStartRec;
-                }
-            }, 1000);
+    function hideDisputePanel() {
+        document.getElementById('disputePanel').style.display = 'none';
+        document.getElementById('acceptPanel').style.display = 'flex';
+        document.getElementById('toggleDisputeBtn').style.display = 'block';
+    }
+
+    async function submitFinalVideo(outcome) {
+        let disputeNote = "";
+        if (outcome === "accepted") {
+            if (!document.getElementById('acceptCheckbox').checked) {
+                return alert("Bitte bestätigen Sie zunächst den Empfang der Ware per Häkchen.");
+            }
+        } else if (outcome === "disputed") {
+            disputeNote = document.getElementById('disputeNoteInput').value.trim();
+            if (!disputeNote) {
+                return alert("Bitte beschreiben Sie den Grund für Ihre Reklamation.");
+            }
+            if (!document.getElementById('disputeCheckbox').checked) {
+                return alert("Bitte bestätigen Sie den Hinweis zur 14-tägigen Einspruchsfrist.");
+            }
+        }
+
+        // Дожидаемся докачки всех чанков из буфера, если интернет только что появился
+        await flushChunkQueue();
+        if (serverConfirmedChunks < totalRecordedChunks) {
+            return alert(`Bitte warten Sie, bis alle Videosegmente hochgeladen sind (${serverConfirmedChunks}/${totalRecordedChunks}). Stellen Sie sicher, dass eine Internetverbindung besteht.`);
+        }
+
+        const btnAccept = document.getElementById('btnSubmitAccept');
+        const btnDispute = document.getElementById('btnSubmitDispute');
+        btnAccept.disabled = true;
+        btnDispute.disabled = true;
+
+        const formData = new FormData();
+        formData.append("tracking_id", trackingId);
+        formData.append("secret_pin", savedEnteredPin);
+        formData.append("outcome", outcome);
+        formData.append("dispute_note", disputeNote);
+
+        const res = await fetch("/api/finalize-unboxing", { method: "POST", body: formData });
+        if (res.ok) {
+            await clearChunksFromDB(trackingId);
+            const data = await res.json();
+            if (data.report_url) {
+                document.getElementById('modalReportLink').href = data.report_url;
+            }
+            if (outcome === "disputed") {
+                document.getElementById('modalCard').style.borderColor = "var(--danger)";
+                document.getElementById('modalIcon').textContent = "🚨";
+                document.getElementById('modalTitle').textContent = "Reklamation & Video registriert!";
+                document.getElementById('modalTitle').style.color = "#fca5a5";
+                document.getElementById('modalDesc').textContent = "Ihr Auspack-Video und Ihre Beschwerde wurden versiegelt. Beachten Sie die 14-tägige Einspruchsfrist.";
+            }
+            document.getElementById('pdfBuyerStatus').textContent = outcome === "disputed" ? "REKLAMATION GEMELDET" : "VOLLSTÄNDIG & VERIFIZIERT";
+            document.getElementById('pdfBuyerAudit').textContent = "PIN verifiziert & Video versiegelt";
+            document.getElementById('successModal').style.display = 'flex';
+        } else {
+            const err = await res.json();
+            alert(err.detail || "Fehler beim Speichern!");
+            btnAccept.disabled = false;
+            btnDispute.disabled = false;
         }
     }
 

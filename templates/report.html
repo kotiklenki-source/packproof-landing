@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="de" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
+    <title>PackProof Prüfbericht — #{{ inspection.tracking_id }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white min-h-screen py-8 px-4">
+
+    <div class="max-w-4xl mx-auto space-y-6">
+        <!-- Верхняя навигация -->
+        <div class="flex justify-between items-center">
+            <a href="/" class="flex items-center gap-2 text-indigo-400 font-extrabold text-xl">
+                <span class="bg-emerald-500/15 border border-emerald-500 text-emerald-400 text-xs px-2 py-0.5 rounded">PPI</span>
+                <span>PackProof Inspection</span>
+            </a>
+            <a href="/app" class="text-sm bg-slate-800 hover:bg-slate-700 border border-slate-700 px-4 py-2 rounded-lg transition">Dashboard</a>
+        </div>
+
+        <!-- Карточка сертификата -->
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 md:p-8 shadow-2xl space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-700 pb-5 gap-4">
+                <div>
+                    <p class="text-xs uppercase tracking-wider text-slate-400">Kryptografischer Prüfbericht</p>
+                    <h1 class="text-2xl md:text-3xl font-mono font-bold text-white mt-1">#{{ inspection.tracking_id }}</h1>
+                </div>
+                <div>
+                    {% if inspection.status == 'verified' %}
+                        <span class="px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500 text-emerald-400 text-sm font-semibold">✅ Verpackung verifiziert</span>
+                    {% elif inspection.status == 'unboxed' %}
+                        <span class="px-4 py-1.5 rounded-full bg-sky-500/15 border border-sky-500 text-sky-400 text-sm font-semibold">📦 Zweiseitig verifiziert</span>
+                    {% elif inspection.status == 'disputed' %}
+                        <span class="px-4 py-1.5 rounded-full bg-rose-500/15 border border-rose-500 text-rose-400 text-sm font-semibold">⚠️ Streitfall gemeldet</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Метаданные и QR -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center bg-slate-900/70 p-5 rounded-xl border border-slate-700">
+                <div class="md:col-span-2 space-y-3">
+                    <div>
+                        <p class="text-xs text-slate-400">Zeitstempel (UTC)</p>
+                        <p class="text-sm font-medium text-slate-200">{{ inspection.created_at.strftime('%d.%m.%Y — %H:%M:%S') }} UTC</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-400">SHA-256 Fingerabdruck (Verpackungsvideo)</p>
+                        <p class="text-xs font-mono text-emerald-400 break-all bg-slate-950 p-2 rounded border border-slate-800 mt-1">
+                            {{ inspection.packing_sha256 or 'N/A' }}
+                        </p>
+                    </div>
+                    {% if inspection.dispute_note %}
+                    <div class="p-3 bg-rose-500/10 border border-rose-500/30 rounded-lg">
+                        <p class="text-xs font-bold text-rose-400">Streitfall-Notiz:</p>
+                        <p class="text-xs text-slate-300 mt-1">{{ inspection.dispute_note }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="flex flex-col items-center justify-center bg-white p-3 rounded-xl w-fit mx-auto">
+                    <img src="/api/qr/{{ inspection.tracking_id }}" alt="QR Code" class="w-32 h-32">
+                    <span class="text-[10px] text-slate-800 font-mono mt-1">Scan to Verify</span>
+                </div>
+            </div>
+
+            <!-- Видео-плееры (Упаковка + Распаковка) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Видео продавца -->
+                <div class="space-y-2">
+                    <h3 class="text-sm font-semibold text-indigo-400">1. Verpackungsnachweis (Absender)</h3>
+                    {% if inspection.packing_video_url %}
+                    <video controls class="w-full rounded-xl bg-black border border-slate-700 shadow-lg">
+                        <source src="{{ inspection.packing_video_url }}" type="video/webm">
+                    </video>
+                    {% else %}
+                    <div class="h-48 bg-slate-900 rounded-xl flex items-center justify-center text-slate-500 text-sm">Kein Video vorhanden</div>
+                    {% endif %}
+                </div>
+
+                <!-- Видео покупателя -->
+                <div class="space-y-2">
+                    <h3 class="text-sm font-semibold text-emerald-400">2. Unboxing-Nachweis (Empfänger)</h3>
+                    {% if inspection.unboxing_video_url %}
+                    <video controls class="w-full rounded-xl bg-black border border-slate-700 shadow-lg">
+                        <source src="{{ inspection.unboxing_video_url }}" type="video/webm">
+                    </video>
+                    <p class="text-[11px] font-mono text-slate-400 break-all">SHA-256: {{ inspection.unboxing_sha256 }}</p>
+                    {% else %}
+                    <div class="h-48 bg-slate-900 border border-dashed border-slate-700 rounded-xl flex flex-col items-center justify-center p-4 text-center">
+                        <p class="text-xs text-slate-400 mb-3">Noch kein Unboxing-Video vom Empfänger hochgeladen.</p>
+                        <a href="/verify?id={{ inspection.tracking_id }}" class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-medium transition">
+                            Unboxing mit PIN starten →
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

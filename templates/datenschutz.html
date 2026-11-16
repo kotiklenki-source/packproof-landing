@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" translate="no">
 <head>
     <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Datenschutzerklärung — PackProof Inspection</title>
     <style>
@@ -26,22 +27,65 @@
             padding: 16px 24px;
             display: flex; justify-content: space-between; align-items: center;
         }
+        .logo-group { display: flex; align-items: center; gap: 10px; }
+        .ppi-badge {
+            background: rgba(34, 197, 94, 0.15); border: 1px solid var(--ppi-green);
+            color: var(--ppi-green); font-weight: 900; font-size: 0.8rem;
+            padding: 4px 8px; border-radius: 6px;
+        }
         .logo-text { font-size: 1.35rem; font-weight: 700; margin: 0; }
         .logo-text a { color: var(--accent); text-decoration: none; }
         .btn-back {
             background: #334155; color: #fff; padding: 8px 16px;
             border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;
+            border: 1px solid #475569;
             transition: background 0.2s;
         }
         .btn-back:hover { background: #475569; }
         .content {
-            max-width: 800px; margin: 40px auto; padding: 30px;
+            max-width: 820px; margin: 36px auto; padding: 32px;
             background: var(--card-bg); border: 1px solid #334155;
-            border-radius: 12px; line-height: 1.6;
+            border-radius: 16px; line-height: 1.65;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45);
         }
-        h1 { color: var(--accent); margin-top: 0; }
-        h2 { font-size: 1.2rem; color: #e2e8f0; margin-top: 24px; }
-        p, li { color: var(--subtext); }
+        .doc-header {
+            border-bottom: 1px solid #334155;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+        h1 { color: var(--accent); margin: 0; font-size: 1.75rem; }
+        .meta-badge {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            color: var(--accent);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+        h2 {
+            font-size: 1.15rem;
+            color: #e2e8f0;
+            margin-top: 28px;
+            padding-left: 10px;
+            border-left: 3px solid var(--ppi-green);
+        }
+        p, li { color: var(--subtext); font-size: 0.95rem; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 6px; }
+        strong { color: #e2e8f0; }
+        .info-box {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin: 14px 0;
+        }
         footer {
             background: var(--card-bg); border-top: 1px solid #334155;
             padding: 20px; text-align: center; font-size: 0.85rem; color: var(--subtext);
@@ -53,34 +97,73 @@
 <body>
 
     <nav class="navbar">
-        <h1 class="logo-text"><a href="/">PackProof Inspection</a></h1>
+        <div class="logo-group">
+            <span class="ppi-badge">PPI</span>
+            <h1 class="logo-text"><a href="/">PackProof Inspection</a></h1>
+        </div>
         <a href="/" class="btn-back">← Zurück zur Startseite</a>
     </nav>
 
     <main class="content">
-        <h1>Datenschutzerklärung</h1>
-        
+        <div class="doc-header">
+            <h1>Datenschutzerklärung</h1>
+            <span class="meta-badge">DSGVO-konform • Stand: November 2026</span>
+        </div>
+
         <h2>1. Datenschutz auf einen Blick</h2>
         <p>
-            Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen Daten passiert, 
-            wenn Sie unsere Website PackProof Inspection besuchen. Personenbezogene Daten sind alle Daten, mit denen Sie persönlich identifiziert werden können.
+            Die folgenden Hinweise geben einen strukturierten Überblick darüber, was mit Ihren personenbezogenen Daten passiert,
+            wenn Sie die Plattform <strong>PackProof Inspection</strong> besuchen oder unsere Dienste zur visuellen Verpackungs- und Auspackdokumentation nutzen.
+            Personenbezogene Daten sind alle Daten, mit denen Sie persönlich identifiziert werden können.
         </p>
 
-        <h2>2. Datenerfassung auf unserer Website</h2>
+        <h2>2. Verantwortliche Stelle</h2>
+        <div class="info-box">
+            <p style="margin:0;">
+                <strong>Yevhenii Banko</strong><br>
+                PackProof Inspection<br>
+                Munkerstraße 15, 95445 Bayreuth, Deutschland<br>
+                E-Mail: <a href="mailto:support@packproof.de" style="color:var(--accent); text-decoration:none;">support@packproof.de</a>
+            </p>
+        </div>
+
+        <h2>3. Welche Daten wir verarbeiten und zu welchem Zweck</h2>
+        <ul>
+            <li><strong>Registrierungs- und Kontodaten:</strong> E-Mail-Adresse, verschlüsseltes Passwort (Hash) sowie Tarifstatus zur Bereitstellung Ihres Nutzerkontos (Art. 6 Abs. 1 lit. b DSGVO).</li>
+            <li><strong>Inspektions- und Videodaten (Packing & Unboxing):</strong> Sendungsnummern (Tracking-IDs), Sicherheits-PINs, aufgezeichnete Videodateien sowie zugehörige kryptografische <strong>SHA-256 Prüfsummen</strong> und Zeitstempel zur fälschungssicheren Beweissicherung und Streitfallklärung (Art. 6 Abs. 1 lit. b und lit. f DSGVO).</li>
+            <li><strong>Technische Zugriffsdaten (Server-Logs):</strong> Browsertyp, Betriebssystem, Referrer-URL, Uhrzeit der Serveranfrage und gekürzte IP-Adresse zur Gewährleistung von Systemsicherheit, Missbrauchsschutz und Stabilität (Art. 6 Abs. 1 lit. f DSGVO).</li>
+        </ul>
+
+        <h2>4. Kamerazugriff & Lokale Zwischenspeicherung (IndexedDB)</h2>
         <p>
-            Die Datenverarbeitung auf dieser Website erfolgt durch den Websitebetreiber. Dessen Kontaktdaten können Sie dem Impressum dieser Website entnehmen. 
-            Ihre Daten werden zum einen dadurch erhoben, dass Sie uns diese mitteilen (z. B. bei der Registrierung oder beim Hochladen von Inspektionsvideos).
+            Für die Aufnahme von Verpackungs- und Auspackvideos greift die Web-Anwendung ausschließlich nach Ihrer ausdrücklichen Freigabe auf die Kamera (und beim Unboxing optional auf das Mikrofon) Ihres Endgeräts zu.
+            Um Datenverluste bei instabiler Internetverbindung zu verhindern, werden Videosegmente während der Aufnahme temporär im lokalen Browser-Speicher (<strong>IndexedDB</strong>) Ihres Geräts gepuffert und nach erfolgreicher Übertragung und Versiegelung automatisch gelöscht.
         </p>
 
-        <h2>3. Speicherung von Videos und Prüfberichten</h2>
+        <h2>5. Speicherung, Versiegelung & Speicherdauer</h2>
         <p>
-            Hochgeladene Inspektionsaufnahmen und Berichte werden ausschließlich zum Zweck der Beweissicherung bei Sendungen gespeichert 
-            und streng vertraulich behandelt. Eine Weitergabe an Dritte findet ohne gesetzliche Grundlage nicht statt.
+            Hochgeladene Videonachweise werden unveränderlich (Write-Once-Read-Many) mit einem SHA-256 Fingerabdruck gespeichert, um Manipulationen im Rahmen der gesetzlichen Gewährleistungs- und Einspruchsfristen (insbesondere der <strong>14-Tage-Frist</strong> bei Reklamationen) auszuschließen.
+            Nach Abschluss der Abwicklung und Ablauf gesetzlicher Aufbewahrungs- bzw. Verjährungsfristen werden die Daten gelöscht, sofern keine offenen Streitfälle bestehen.
+        </p>
+
+        <h2>6. Ihre Rechte nach der DSGVO</h2>
+        <p>Sie haben im Rahmen der geltenden gesetzlichen Bestimmungen jederzeit das Recht auf:</p>
+        <ul>
+            <li><strong>Auskunft</strong> über Ihre bei uns gespeicherten personenbezogenen Daten (Art. 15 DSGVO),</li>
+            <li><strong>Berichtigung</strong> unrichtiger Daten (Art. 16 DSGVO),</li>
+            <li><strong>Löschung</strong> Ihrer Daten, sofern keine vertraglichen oder gesetzlichen Aufbewahrungspflichten entgegenstehen (Art. 17 DSGVO),</li>
+            <li><strong>Einschränkung der Verarbeitung</strong> (Art. 18 DSGVO) sowie <strong>Datenübertragbarkeit</strong> (Art. 20 DSGVO),</li>
+            <li><strong>Beschwerde</strong> bei einer zuständigen Datenschutz-Aufsichtsbehörde (z. B. Bayerisches Landesamt für Datenschutzaufsicht).</li>
+        </ul>
+
+        <h2>7. SSL- bzw. TLS-Verschlüsselung</h2>
+        <p>
+            Diese Seite nutzt aus Sicherheitsgründen und zum Schutz der Übertragung vertraulicher Inhalte (wie PIN-Codes, Login-Daten und Beweisvideos) eine moderne <strong>SSL- bzw. TLS-Verschlüsselung</strong>.
         </p>
     </main>
 
     <footer>
-        <div>© PackProof Inspection System. Alle Rechte vorbehalten.</div>
+        <div>© 2026 PackProof Inspection System. Alle Rechte vorbehalten.</div>
         <div style="margin-top: 8px;">
             <a href="/impressum.html">Impressum</a> | 
             <a href="/datenschutz.html">Datenschutzerklärung</a>
