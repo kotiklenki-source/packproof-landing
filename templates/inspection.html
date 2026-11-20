@@ -92,7 +92,25 @@
 
         .input-group { display: flex; flex-direction: column; gap: 6px; }
         label { font-size: 0.85rem; font-weight: 600; color: #cbd5e1; }
-        input, select { background: #334155; border: 1px solid #475569; color: #fff; padding: 12px; border-radius: 8px; font-size: 0.95rem; outline: none; }
+        input[type="text"], select { background: #334155; border: 1px solid #475569; color: #fff; padding: 12px; border-radius: 8px; font-size: 0.95rem; outline: none; }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 2px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: var(--subtext);
+            user-select: none;
+        }
+        .checkbox-row input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent);
+            cursor: pointer;
+            margin: 0;
+        }
 
         .mode-hint { font-size: 0.75rem; color: var(--subtext); }
 
@@ -160,7 +178,7 @@
         <summary>ℹ️ Kurzanleitung</summary>
         <div class="instruction-content">
             <ol>
-                <li>Geben Sie die eindeutige <b>Sendungsnummer / Tracking-ID</b> ein.</li>
+                <li>Geben Sie die eindeutige <b>Sendungsnummer</b> (DHL, Hermes, DPD, GLS, UPS) oder eine <b>Auftragsnummer</b> ein.</li>
                 <li>Wählen Sie den <b>Aufnahmemodus</b> (Time-Lapse oder Standard 1x).</li>
                 <li>Klicken Sie auf <b>„Aufnahme starten“</b> und verpacken Sie die Ware vollständig sichtbar vor der Kamera.</li>
                 <li>Klicken Sie auf <b>„Hochladen & Versiegeln“</b>, um den SHA-256 Nachweis, QR-Code und Käufer-PIN zu erstellen.</li>
@@ -169,8 +187,12 @@
     </details>
 
     <div class="input-group">
-        <label for="trackingId">Sendungsnummer / Tracking-ID:</label>
-        <input type="text" id="trackingId" placeholder="z. B. DE123456789" required>
+        <label id="trackingLabel" for="trackingId">Sendungsnummer (DHL, Hermes, DPD, GLS, UPS):</label>
+        <input type="text" id="trackingId" placeholder="z. B. 00340434161094042557" required>
+        <label class="checkbox-row" for="isOrderId">
+            <input type="checkbox" id="isOrderId">
+            <span>Auftragsnummer / Privatverkauf (ohne Versanddienstleister-Format)</span>
+        </label>
     </div>
 
     <div class="input-group">
@@ -235,6 +257,8 @@
     const downloadQrBtn = document.getElementById('downloadQrBtn');
     const downloadCardBtn = document.getElementById('downloadCardBtn');
     const trackingInput = document.getElementById('trackingId');
+    const trackingLabel = document.getElementById('trackingLabel');
+    const isOrderIdCheckbox = document.getElementById('isOrderId');
     const modeSelect = document.getElementById('modeSelect');
     const modeHint = document.getElementById('modeHint');
     const recOverlay = document.getElementById('recOverlay');
@@ -249,6 +273,16 @@
     let secondsRecorded = 0;
     let currentPin = "";
     let lastTrackingId = "";
+
+    isOrderIdCheckbox.addEventListener('change', () => {
+        if (isOrderIdCheckbox.checked) {
+            trackingLabel.textContent = "Auftragsnummer / Bestell-ID:";
+            trackingInput.placeholder = "z. B. AUFTRAG-2026-01";
+        } else {
+            trackingLabel.textContent = "Sendungsnummer (DHL, Hermes, DPD, GLS, UPS):";
+            trackingInput.placeholder = "z. B. 00340434161094042557";
+        }
+    });
 
     modeSelect.addEventListener('change', () => {
         modeHint.textContent = modeSelect.value === 'timelapse'
@@ -282,7 +316,7 @@
     recordBtn.addEventListener('click', () => {
         if (!isRecording) {
             if (!trackingInput.value.trim()) {
-                showStatus("Bitte geben Sie zuerst eine Sendungsnummer / Tracking-ID ein!", true);
+                showStatus("Bitte geben Sie zuerst eine Sendungs- oder Auftragsnummer ein!", true);
                 trackingInput.focus();
                 return;
             }
@@ -316,6 +350,7 @@
         isRecording = true;
 
         trackingInput.disabled = true;
+        isOrderIdCheckbox.disabled = true;
         modeSelect.disabled = true;
         recOverlay.style.display = 'flex';
         updateTimerDisplay();
@@ -341,6 +376,7 @@
         isRecording = false;
 
         trackingInput.disabled = false;
+        isOrderIdCheckbox.disabled = false;
         modeSelect.disabled = false;
         recordBtn.textContent = "🔴 Neu aufnehmen";
         recordBtn.className = "btn-start";
@@ -363,6 +399,7 @@
         formData.append("file", blob, `${lastTrackingId}.webm`);
         formData.append("tracking_id", lastTrackingId);
         formData.append("secret_pin", currentPin);
+        formData.append("is_order_id", isOrderIdCheckbox.checked ? "true" : "false");
 
         uploadBtn.disabled = true;
         recordBtn.disabled = true;
@@ -376,9 +413,10 @@
                 throw new Error(data.detail || "Fehler beim Hochladen.");
             }
 
-            qrImage.src = `/api/qr/${encodeURIComponent(data.tracking_id)}`;
+            lastTrackingId = data.tracking_id;
+            qrImage.src = `/api/qr/${encodeURIComponent(lastTrackingId)}`;
             generatedPin.textContent = currentPin;
-            document.getElementById('openReportLink').href = `/report/${encodeURIComponent(data.tracking_id)}`;
+            document.getElementById('openReportLink').href = `/report/${encodeURIComponent(lastTrackingId)}`;
             qrSection.style.display = 'flex';
             showStatus("✅ Erfolgreich hochgeladen & kryptografisch versiegelt!", false);
         } catch (err) {
@@ -506,6 +544,9 @@
         recordBtn.disabled = false;
         recordBtn.textContent = "🔴 Aufnahme starten";
         trackingInput.value = '';
+        isOrderIdCheckbox.checked = false;
+        trackingLabel.textContent = "Sendungsnummer (DHL, Hermes, DPD, GLS, UPS):";
+        trackingInput.placeholder = "z. B. 00340434161094042557";
         statusMsg.style.display = 'none';
         recordedChunks = [];
     }
