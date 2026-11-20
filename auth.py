@@ -1,4 +1,7 @@
 import os
+import re
+import time
+from collections import defaultdict
 import bcrypt
 from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -11,6 +14,61 @@ router = APIRouter(tags=["auth"])
 templates = Jinja2Templates(directory="templates")
 
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@packproof.de").lower()
+
+DISPOSABLE_DOMAINS = {
+    "tempmail.com", "temp-mail.org", "10minutemail.com", "guerrillamail.com",
+    "mailinator.com", "yopmail.com", "trashmail.com", "getnada.com",
+    "dispostable.com", "mohmal.com", "fakeinbox.com", "maildrop.cc",
+    "tempail.com", "emailondeck.com", "sharklasers.com", "trash-mail.com",
+    "byom.de", "wegwerfemail.de", "muellmail.com", "spoofmail.de",
+}
+
+EMAIL_REGEX = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+class InMemoryRateLimiter:
+    def __init__(self, max_requests: int, window_seconds: int):
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        self.hits: dict[str, list[float]] = defaultdict(list)
+
+    def is_allowed(self, request: Request, scope: str) -> bool:
+        forwarded = request.headers.get("x-forwarded-for")
+        client_ip = (
+            forwarded.split(",")[0].strip()
+            if forwarded
+            else (request.client.host if request.client else "unknown")
+        )
+        key = f"{scope}:{client_ip}"
+        now = time.monotonic()
+
+        self.hits[key] = [t for t in self.hits[key] if now - t < self.window_seconds]
+        if len(self.hits[key]) >= self.max_requests:
+            return False
+
+        self.hits[key].append(now)
+        return True
+
+
+login_limiter = InMemoryRateLimiter(max_requests=10, window_seconds=600)     # 10 попыток за 10 мин
+register_limiter = InMemoryRateLimiter(max_requests=3, window_seconds=3600)  # 3 регистрации в час с IP
+
+
+def normalize_email(raw_email: str) -> tuple[str | None, str | None]:
+    """Возвращает (нормализованный_email, текст_ошибки_на_немецком)."""
+    clean = raw_email.strip().lower()
+    if not EMAIL_REGEX.match(clean):
+        return None, "Bitte geben Sie eine gültige E-Mail-Adresse ein."
+
+    local_part, domain = clean.rsplit("@", 1)
+    if domain in DISPOSABLE_DOMAINS:
+        return None, "Wegwerf-E-Mail-Adressen sind für die Registrierung nicht zugelassen."
+
+    # Защита от бесконечных клонов через "+alias" в Gmail
+    if domain in {"gmail.com", "googlemail.com"} and "+" in local_part:
+        local_part = local_part.split("+", 1)[0]
+
+    return f"{local_part}@{domain}", None
 
 
 def hash_password(password: str) -> str:
@@ -43,7 +101,23 @@ async def login_submit(
     password: str = Form(...),
     db: Session = Depends(get_db),
 ):
-    email_clean = email.strip().lower()
+    if not login_limiter.is_allowed(request, "login"):
+        return templates.TemplateResponse(
+            request=request,
+            name="login.html",
+            context={"error": "Zu viele Anmeldeversuche. Bitte warten Sie einige Minuten."},
+            status_code=429,
+        )
+
+    email_clean, err = normalize_email(email)
+    if err:
+        return templates.TemplateResponse(
+            request=request,
+            name="login.html",
+            context={"error": err},
+            status_code=400,
+        )
+
     user = db.query(User).filter(User.email == email_clean).first()
 
     if not user or not verify_password(password, user.password_hash):
@@ -70,7 +144,23 @@ async def register_submit(
     password: str = Form(...),
     db: Session = Depends(get_db),
 ):
-    email_clean = email.strip().lower()
+    if not register_limiter.is_allowed(request, "register"):
+        return templates.TemplateResponse(
+            request=request,
+            name="login.html",
+            context={"error": "Zu viele Registrierungen von dieser IP-Adresse. Bitte versuchen Sie es später erneut."},
+            status_code=429,
+        )
+
+    email_clean, err = normalize_email(email)
+    if err:
+        return templates.TemplateResponse(
+            request=request,
+            name="login.html",
+            context={"error": err},
+            status_code=400,
+        )
+
     if len(password) < 6:
         return templates.TemplateResponse(
             request=request,

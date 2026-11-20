@@ -1,29 +1,43 @@
-# CONTEXT.md — Паспорт проекта PackProof Inspection
+# CONTEXT.md — PackProof Inspection (PPI)
 
-## 1. Суть проекта
-Веб-сервис видеофиксации состояния посылок при упаковке и распаковке для защиты продавцов и покупателей от споров/мошенничества.
+## 1. Обзор проекта
+- **Название:** PackProof Inspection (PPI)
+- **Продакшн-домен:** `https://packproofinspection.com`
+- **Назначение:** Веб-сервис видеофиксации упаковки (Packing) и распаковки (Unboxing) посылок для защиты e-commerce продавцов от мошенничества с возвратами (Retourenbetrug) в Германии.
+- **Язык интерфейса и юридических страниц:** Немецкий (`de`), с атрибутом `translate="no"` на ключевых UI-элементах.
 
-## 2. Жестко зафиксированный стек (НЕ менять на Flask или SQLite!)
-- **Backend:** Python 3.11+, FastAPI, Uvicorn, Jinja2.
-- **Database:** Neon PostgreSQL (облачная БД, подключается через `DATABASE_URL` из `.env`).
-- **Storage:** Cloudflare R2 (через `boto3` S3-совместимый API — видео и QR-коды не хранятся локально на диске Render!).
-- **Hosting:** Render.com.
-- **Frontend:** HTML5, Tailwind CSS, Vanilla JS (`MediaRecorder API` для записи видео с камеры).
+## 2. Текущий стек и инфраструктура (Production)
+- **Backend:** Python 3.14, FastAPI, Uvicorn (`app.py` в корне репозитория).
+- **Хостинг:** Render (`Start Command`: `uvicorn app:app --host 0.0.0.0 --port $PORT`, `Auto-Deploy` из ветки `main` репозитория `packproof-landing`).
+- **База данных:** Neon PostgreSQL (подключение через `DATABASE_URL`).
+- **Объектное хранилище видео:** Cloudflare R2 (бакет `packproof-videos`, S3-совместимый API через `boto3`).
+- **Frontend:** Серверный рендеринг Jinja2 (`templates/`), тёмная тема PPI, локальный буфер видеосегментов в браузере через **IndexedDB** для защиты от обрыва интернета во время записи.
 
-## 3. Текущая структура файлов (в корне `packproof-landing/`)
-- `CONTEXT.md` — этот файл.
-- `app.py` — главный входной файл FastAPI (роуты страниц, загрузка видео в R2, генерация QR, отчёты, админка).
-- `auth.py` — роутер авторизации, регистрации, сессий/токенов и личного кабинета (`/login`, `/register`, `/dashboard`).
-- `database.py` — подключение к Neon PostgreSQL и создание таблиц.
-- `requirements.txt` — зависимости (`fastapi`, `uvicorn`, `python-multipart`, `qrcode`, `pillow`, `boto3`, `requests`, `sqlalchemy`, `psycopg2-binary`, `passlib[bcrypt]`, `itsdangerous`).
-- `templates/` — HTML-шаблоны (`index.html`, `inspection.html`, `dashboard.html`, `report.html`, `admin.html`, `login.html`, `impressum.html`, `datenschutz.html`).
-- `en/` — англоязычные версии статических страниц (если используются).
-- Иконки и манифест в корне (`favicon.ico`, `site.webmanifest` и т.д.).
+## 3. Структура файлов репозитория
+- `app.py` — основной сервер FastAPI (все маршруты страниц и API, работа с БД и R2).
+- `requirements.txt` — зависимости Python.
+- `templates/` — HTML-шаблоны:
+  - `index.html` — лендинг (главная страница).
+  - `login.html` — регистрация и вход (`/login`).
+  - `dashboard.html` — личный кабинет продавца (`/app`).
+  - `inspection.html` — создание инспекции и запись видео упаковки (`/inspection`).
+  - `verify.html` — проверка QR + PIN и запись видео распаковки (`/verify`).
+  - `report.html` — публичный/защищённый отчёт с двумя видео и SHA-256 хэшами (`/report/...`).
+  - `admin.html` — панель администратора.
+  - `impressum.html` и `datenschutz.html` — актуальные юридические страницы (DSGVO / Stand: November 2026, оператор: Yevhenii Banko, Bayreuth).
 
-## 4. Бизнес-логика и поток данных
-1. Пользователь (или гость по трек-номеру) открывает `/inspect?tracking=...` (`inspection.html`).
-2. Записывает видео распаковки/упаковки с камеры (лимит 3 минуты).
-3. Фронтенд отправляет видео на `/api/upload-video`.
-4. Бэкенд загружает видео напрямую в бакет **Cloudflare R2**, генерирует QR-код со ссылкой на публичный отчёт `/report/{tracking_number}`, сохраняет QR в R2 и записывает метаданные в **Neon PostgreSQL**.
-5. Пользователь перенаправляется на `/report/{tracking_number}`, где видит видео, статус, дату и QR-код.
-6. Авторизованные пользователи видят все свои инспекции в `/dashboard` (Личный кабинет). Админ видит всё в `/admin`.
+## 4. Переменные окружения (настроены на Render)
+`DATABASE_URL`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_PUBLIC_URL`, `APP_BASE_URL`, `SECRET_KEY`.
+*(Локально в репозитории `.env` не хранится и не коммитится).*
+
+## 5. Следующая задача (внедрение защиты от злоупотреблений)
+Необходимо интегрировать в текущий `app.py` и шаблоны 4 уровня защиты, не ломая существующую логику IndexedDB, Neon PostgreSQL и R2:
+1. Валидация форматов трек-номеров (DHL, UPS, DPD, Hermes, GLS).
+2. Лимит инспекций (не более 2 записей на один трек-номер).
+3. Автоматическое удаление видео в Cloudflare R2 через 30 дней (Lifecycle Rule / TTL для удержания в рамках бесплатного тира).
+4. Защита регистрации и аутентификации (блокировка одноразовых email-доменов и rate limiting).
+
+## 6. Правила работы с кодом для AI
+- Не переписывать проект на Flask или SQLite — используется строго **FastAPI + Neon PostgreSQL (`DATABASE_URL`) + Cloudflare R2**.
+- Все HTML-шаблоны отдаются только из папки `templates/` через `templates.TemplateResponse(request=request, name="...")`.
+- Перед выдачей кода учитывать текущие названия таблиц и колонок в `app.py`.
